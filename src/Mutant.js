@@ -79,8 +79,6 @@ Mutant.prototype.patch = function ( value, path ) {
   const self = this
   path = split.apply( null, Array.prototype.slice.call(arguments, 1 ) )
 
-  console.log('Mutant.patch', value, path )
-
   if ( blank( path ) ) {
     if ( 'undefined' == typeof value )
       return false

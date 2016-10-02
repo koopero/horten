@@ -12,8 +12,6 @@ module.exports = function normalize() {
     if ( _.isUndefined( arg ) )
       return
 
-    console.log('norminner', arg )
-
     if ( !mutant )
       mutant = new Mutant()
 
