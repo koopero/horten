@@ -15,6 +15,7 @@ describe('path', () => {
 
     test([],      '/', 'noargs => /' )
     test(['/'],   '/' )
+    test(['/', 'foo'],   'foo/' )
     test(['foo'],   'foo/' )
     test(['foo/bar'],   'foo/bar/' )
     test(['foo////bar'],   'foo/bar/' )
@@ -23,6 +24,10 @@ describe('path', () => {
 
 
     test([ 'x', 0.5 ],   'x/0/' )
+
+    test([ 'x', true ],   'x/1/' )
+    test([ 'x', false ],   'x/0/' )
+
 
 
   })

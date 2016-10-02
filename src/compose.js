@@ -1,15 +1,22 @@
-const path = require('./path')
-    , flatten = require('./flatten')
+const Mutant = require('./Mutant')
+    , normalize = require('./normalize')
 
 const _ = require('lodash')
 
 module.exports = function compose() {
-  const result = {}
+  var mutant
 
-  for ( var i = 0; i < arguments.length; i ++ ) {
-    var arg = arguments[i]
-    _.merge( result, flatten( arg ) )
-  }
+  _.map( arguments, function ( arg ) {
+    if ( _.isUndefined( arg ) )
+      return
 
-  return result
+    arg = normalize( arg )
+
+    if ( !mutant )
+      mutant = new Mutant( arg )
+    else
+      mutant.patch( arg )
+  })
+
+  return mutant && mutant.result()
 }
