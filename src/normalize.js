@@ -2,7 +2,8 @@ const _ = require('lodash')
     , path = require('./path')
     , split = path.split
     , eachKey = require('./eachKey')
-    , isTree = require('./isTree')
+    , hasKeys = require('./hasKeys')
+    , isArray = _.isArray
     , Mutant = require('./Mutant')
 
 module.exports = function normalize() {
@@ -21,7 +22,11 @@ module.exports = function normalize() {
   return mutant.result()
 
   function walk( value, path ) {
-    if ( isTree( value ) ) {
+    if ( isArray( value ) ){
+      mutant.patch( [], path )
+    }
+
+    if ( hasKeys( value ) ) {
       eachKey( value, function ( value, key ) {
         walk( value, split( path, key ) )
       } )

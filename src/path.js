@@ -1,29 +1,59 @@
 const path = exports
 
+const _ = require('lodash')
+
 const SEP = '/'
 
 path.sep = SEP
 
-path.blank = function ( path ) {
-  if ( path == '/' )
-    return true
+path.blank = function () {
+  return array( arguments )
 
-  if ( !path.length )
+  function array( args ) {
+    for ( var i = 0; i < args.length; i ++ ) {
+      var arg = args[i]
+      if ( 'string' == typeof arg ) {
+        if ( !arg.match( /^\/*$/ ) )
+          return false
+      } else if ( arg.length )
+        if ( !array( arg ) )
+          return false
+    }
+
     return true
+  }
+}
+
+path.last = function () {
+  const p = path.split( arguments )
+  if ( p.length )
+    return p[ p.length - 1 ]
 }
 
 path.simple = function ( str ) {
-  if ( Array.isArray( str ) ) {
-    return str.length == 1
+  var count = 0
+  array( arguments )
+  return count == 1
+
+  function array( args ) {
+    for ( var i = 0; i < args.length; i ++ ) {
+      var arg = args[i]
+      if ( 'string' == typeof arg ) {
+        if ( !arg.match( /^\/*$/ ) ) {
+          count ++
+        }
+      } else if ( arg.length )
+        array( arg )
+
+      if ( count > 1 )
+        return
+    }
   }
+}
 
-  if ( 'string' != typeof str )
-    return false
-
-  if ( str.indexOf( SEP ) != -1 )
-    return false
-
-  return true
+path.slice = function ( arr, start ) {
+  start = parseInt( start ) || 0
+  return path.split( Array.prototype.slice.call( arr, start ) )
 }
 
 path.split = function () {
@@ -39,7 +69,7 @@ path.split = function () {
   }
 
   function arg( arg ) {
-    if ( Array.isArray( arg ) ) {
+    if ( !_.isString( arg ) && _.isArrayLike( arg ) ) {
       array( arg )
     }
 
@@ -69,11 +99,24 @@ path.stringify = function ( arg ) {
 path.resolve = function () {
   var result = ''
 
-  for( var i = 0; i < arguments.length; i ++ ) {
-    eachArg( arguments[i] )
+  array( arguments )
+
+  if ( !result.length || result[result.length-1] != SEP )
+    result = result + SEP
+
+  return result
+
+  function array( args ) {
+    for( var i = 0; i < args.length; i ++ ) {
+      eachArg( args[i] )
+    }
   }
 
   function eachArg( arg ) {
+    if ( !_.isString( arg ) && _.isArrayLike( arg ) ) {
+      return array( arg )
+    }
+
     arg = path.stringify( arg )
 
     if ( 'string' == typeof arg ) {
@@ -88,8 +131,4 @@ path.resolve = function () {
     result = result + tok + SEP
   }
 
-  if ( !result.length || result[result.length-1] != SEP )
-    result = result + SEP
-
-  return result
 }

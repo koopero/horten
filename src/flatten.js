@@ -1,6 +1,6 @@
 const path = require('./path')
     , resolve = path.resolve
-    , isTree = require('./isTree')
+    , hasKeys = require('./hasKeys')
     , eachKey = require('./eachKey')
     , circular = require('./circular')
 
@@ -12,7 +12,7 @@ module.exports = function flatten ( object ) {
   return result
 
   function walk( value, path ) {
-    if ( isTree( value ) ) {
+    if ( hasKeys( value ) ) {
       circ.push( value )
       eachKey( value, ( sub, key ) => walk( sub, resolve( path, key ) ) )
       circ.pop()

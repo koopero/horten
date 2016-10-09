@@ -3,9 +3,38 @@ const test = require('./_test')
 
 describe('Mutant', function() {
   const Mutant = require('../src/Mutant')
-  it('not smoke', function () {
-    const foo = new Mutant()
-    foo.result()
+
+  describe('.isMutant', function () {
+    const isMutant = Mutant.isMutant
+    it('works', function () {
+      const mutant = Mutant()
+      assert.equal( isMutant( mutant ), true )
+      assert.equal( isMutant( null ), false )
+      assert.equal( isMutant( {} ), false )
+      assert.equal( isMutant( [] ), false )
+
+    })
+  })
+
+  describe('initialize', function () {
+    it('new', function () {
+      const foo = new Mutant()
+      foo.result()
+    })
+
+    it('function', function () {
+      const foo = Mutant()
+      foo.result()
+    })
+
+    it('from Mutant', function () {
+      const ref = { foo: 'bar' }
+          , a = Mutant( ref )
+          , b = Mutant( a )
+          , r = b.get()
+
+      assert.equal( r, ref )
+    })
   })
 
   it('pass a reference', function () {
@@ -23,6 +52,66 @@ describe('Mutant', function() {
       assert.isFunction( mutant.isDirty )
       assert.isBoolean( mutant.isDirty() )
     })
+  })
+
+  describe('.get', function () {
+    it('will walk paths', function () {
+      const mutant = new Mutant( { foo: 'bar' } )
+      assert.equal( mutant.get('foo'), 'bar' )
+    })
+
+    it('result is never mutated', function () {
+      const data = { foo: 'bar' }
+          , mutant = Mutant( data )
+
+      assert.equal( mutant.get(), data )
+      mutant.set( 'baz', 'foo' )
+      const result = mutant.get()
+      assert.notEqual( result, data )
+      assert.deepEqual( result, { foo: 'baz'} )
+
+      mutant.set( 'bop', 'foo' )
+      assert.deepEqual( result, { foo: 'baz'} )
+      const nextResult = mutant.get()
+      assert.notEqual( nextResult, result )
+      assert.deepEqual( nextResult, { foo: 'bop'} )
+    })
+  })
+
+  describe('.map', function () {
+    it('will do nothing', function () {
+      const mutant = new Mutant( { foo: 'bar' } )
+      mutant.map()
+      assert.equal( mutant.get('foo'), 'bar' )
+    })
+
+    it('will do something', function () {
+      const mutant = new Mutant( { foo: 'bar' } )
+      mutant.map( function( mutant, path ) {
+        assert.equal( mutant.get(), 'bar' )
+        assert.equal( path, 'foo' )
+        mutant.set( 42 )
+      } )
+      assert.equal( mutant.get('foo'), 42 )
+    })
+  })
+
+  describe('.del', function () {
+    it('will delete root', function () {
+      const mutant = new Mutant( { foo: 'bar' } )
+      mutant.del()
+      assert.equal( mutant.get(), undefined )
+    })
+
+    it('will delete key', function () {
+      const init = { foo: 'bar', bar: 'baz' }
+          , mutant = new Mutant( init )
+      mutant.del('foo')
+      const result = mutant.get()
+      assert.deepEqual( result, { bar: 'baz' } )
+      assert.notEqual( result, init )
+    })
+
   })
 
   describe('.patch', function() {
@@ -150,6 +239,83 @@ describe('Mutant', function() {
 
       const result = mutant.result()
       assert.equal( mutant.result().baz, ref )
+    })
+  })
+
+  describe('walk + set', function () {
+    it('will set', function () {
+      const mutant = Mutant()
+      mutant.walk('foo/bar').set( 'baz' )
+      const result = mutant.get()
+      assert.deepEqual( result, { foo: { bar: 'baz' } } )
+    })
+
+    it('will merge', function () {
+      const mutant = Mutant( { foo: 42 } )
+      mutant.walk('bar').set( 'baz' )
+      const result = mutant.get()
+      assert.deepEqual( result, { foo: 42, bar: 'baz' } )
+    })
+
+    it('will patch', function () {
+      const mutant = Mutant( { foo: { bar: { baz: 42 } } } )
+      mutant.walk('foo/bar').patch( { bop: 123 } )
+      const result = mutant.get()
+      assert.deepEqual( result, { foo: { bar: { baz: 42, bop: 123 } } } )
+    })
+
+    it('will patch 2', function () {
+      const mutant = Mutant( { foo: { bar: { baz: 42 } } } )
+      mutant.walk('foo').patch( { bop: 123 }, 'bar' )
+      const result = mutant.get()
+      assert.deepEqual( result, { foo: { bar: { baz: 42, bop: 123 } } } )
+    })
+  })
+
+  describe('walk + map', function () {
+    it('will set inner key', function () {
+      const mutant = Mutant( { foo: { bar: 123, baz: 42 } } )
+      mutant.walk('foo').map( function ( sub, key ) {
+        if ( key == 'bar' )
+          sub.set( Mutant( 456 ) )
+        else
+          return sub
+      })
+      const result = mutant.get()
+      assert.deepEqual( result, { foo: { bar: 456, baz: 42 } } )
+    })
+
+    it('will set inner key 2 ', function () {
+      const mutant = Mutant( { foo: { bar: 123, baz: 42 } } )
+      mutant.walk('foo').map( function ( sub, key ) {
+        if ( key == 'bar' )
+          return 456
+      })
+      const result = mutant.get()
+      assert.deepEqual( result, { foo: { bar: 456, baz: 42 } } )
+    })
+  })
+
+  describe('eachPath', function () {
+    it('is a function', function () {
+      const mutant = Mutant()
+      assert.isFunction( mutant.eachPath )
+    })
+
+    it('will call callback', function () {
+      const data = { foo: { bar: 42 } }
+          , mutant = Mutant( data )
+
+      var calls = 0
+
+      mutant.eachPath( function ( value, path ) {
+        assert.deepEqual( path, ['foo', 'bar'] )
+        assert.equal( value, 42 )
+
+        calls++
+      } )
+
+      assert.equal( calls, 1 )
     })
   })
 })

@@ -31,7 +31,10 @@ describe('normalize', function () {
     testEqual( [ null, 42 ], 42 )
     testEqual( [ 42, null ], null )
     testEqual( [ 42, undefined ], 42 )
+  })
 
+  describe( 'passes arrays', function () {
+    testEquiv( [ [ 1, 2, 3 ] ], [ 1, 2, 3 ] )
   })
 
   it('works', function () {
