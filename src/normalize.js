@@ -1,16 +1,17 @@
-const _ = require('lodash')
-    , path = require('./path')
+const path = require('./path')
     , split = path.split
     , eachKey = require('./eachKey')
     , hasKeys = require('./hasKeys')
-    , isArray = _.isArray
+    , isArray = ( val ) => Array.isArray( val )
     , Mutant = require('./Mutant')
+    , isUndefined = ( val ) => 'undefined' == typeof val
+
 
 module.exports = function normalize() {
   var mutant
 
-  _.map( arguments, function ( arg ) {
-    if ( _.isUndefined( arg ) )
+  eachKey( arguments, function ( arg ) {
+    if ( isUndefined( arg ) )
       return
 
     if ( !mutant )

@@ -1,22 +1,22 @@
 module.exports = pairs
 
-const path = require('./path')
-    , SEP = path.sep
+const SEP = require('./path').sep
+    , pathJoin = require('./pathJoin')
+    , hasKeys = require('./hasKeys')
+    , eachKey = require('./eachKey')
 
 function pairs ( object ) {
-  const joinPath = ( a, b ) => ( a == SEP ? '' : a ) + b + SEP
-
   const result = []
   walk( object, SEP )
   return result
 
   function walk( ob, path ) {
-    if ( 'object' != typeof ob ) {
+    if ( !hasKeys( ob ) ) {
       result.push( [ path, ob ] )
     } else {
       for ( var k in ob ) {
         if ( ob.hasOwnProperty( k ) ) {
-          walk( ob[k], joinPath( path, k ) )
+          walk( ob[k], pathJoin( path, k ) )
         }
       }
     }

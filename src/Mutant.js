@@ -11,8 +11,6 @@ const path = require('./path')
     , isDefined = ( val ) => 'undefined' != typeof val
     , isArray = val => Array.isArray( val )
 
-const _ = require('lodash')
-
 Mutant.isMutant = ( val ) => val instanceof Mutant
 
 function Mutant( initial ) {
@@ -28,12 +26,13 @@ function Mutant( initial ) {
 
 Mutant.prototype.result = function () {
   const self = this
+      , subResults = {}
+
   var value = this.value
     , isClone = false
 
   // console.warn('result', self )
   if ( self._subMutants ) {
-    const subResults = {}
 
     eachKey( self._subMutants, function ( sub, key ) {
       // console.warn('sub', sub )
@@ -64,9 +63,9 @@ Mutant.prototype.result = function () {
 
   function copy() {
     if ( isArray( self._value ) ) {
-      self._value = _.extend( [], self._value, subResults )
+      self._value = Object.assign( [], self._value, subResults )
     } else {
-      self._value = _.extend( {}, self._value, subResults )
+      self._value = Object.assign( {}, self._value, subResults )
     }
 
     isClone = true
@@ -83,7 +82,7 @@ Mutant.prototype.compose = function () {
 
 Mutant.prototype.___mutate = function () {
   const self = this
-  var value = _.isArray( self._value ) ? [] : {}
+  var value = Array.isArray( self._value ) ? [] : {}
   eachKey( self._value, function ( value, key ) {
     self._subMutants[ key ] = self._subMutants[ key ] || new Mutant( value )
     value[ key ] = value
@@ -267,4 +266,14 @@ Mutant.prototype.del = function () {
 
 Mutant.prototype.eachPath = function ( callback, initialPath ) {
   return eachPath( this.get(), callback, initialPath )
+}
+
+Mutant.prototype.cursor = function() {
+  const Cursor = require('./Cursor')
+      , cursor = Cursor()
+
+  cursor.path = this.path
+  cursor.root = this.root
+
+  return cursor
 }

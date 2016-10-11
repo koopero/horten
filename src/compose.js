@@ -1,13 +1,13 @@
 const Mutant = require('./Mutant')
     , normalize = require('./normalize')
-
-const _ = require('lodash')
+    , eachKey = require('./eachKey')
+    , isUndefined = ( val ) => 'undefined' == typeof val
 
 module.exports = function compose() {
   var mutant
 
-  _.map( arguments, function ( arg ) {
-    if ( _.isUndefined( arg ) )
+  eachKey( arguments, function ( arg ) {
+    if ( isUndefined( arg ) )
       return
 
     arg = normalize( arg )

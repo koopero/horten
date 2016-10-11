@@ -16,6 +16,12 @@ describe('Mutant', function() {
     })
   })
 
+  xit('is an EventEmitter', function () {
+    const mutant = Mutant()
+    assert.isFunction( mutant.on )
+    assert.isFunction( mutant.emit )
+  })
+
   describe('initialize', function () {
     it('new', function () {
       const foo = new Mutant()

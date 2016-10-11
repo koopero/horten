@@ -1,8 +1,11 @@
 const path = exports
 
-const _ = require('lodash')
+const isString = ( val ) => 'string' == typeof val
+    , isArrayLike = ( val ) => ( 'object' == typeof val ) && ( 'number' == typeof val.length )
 
 const SEP = '/'
+
+
 
 path.sep = SEP
 
@@ -69,7 +72,7 @@ path.split = function () {
   }
 
   function arg( arg ) {
-    if ( !_.isString( arg ) && _.isArrayLike( arg ) ) {
+    if ( !isString( arg ) && isArrayLike( arg ) ) {
       array( arg )
     }
 
@@ -113,7 +116,7 @@ path.resolve = function () {
   }
 
   function eachArg( arg ) {
-    if ( !_.isString( arg ) && _.isArrayLike( arg ) ) {
+    if ( !isString( arg ) && isArrayLike( arg ) ) {
       return array( arg )
     }
 
@@ -130,5 +133,4 @@ path.resolve = function () {
 
     result = result + tok + SEP
   }
-
 }
