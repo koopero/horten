@@ -23,20 +23,23 @@ describe('eachPath', function () {
     eachPath( data, function ( value, path ) {
       assert.deepEqual( path, ['foo', 'bar'] )
       assert.equal( value, 42 )
-
       calls++
     } )
 
     assert.equal( calls, 1 )
   })
 
-  xit('will not do anything to primitives', function () {
-    eachPath( new Buffer('foo'), assert.fail )
-    eachPath( true, assert.fail )
-    eachPath( false, assert.fail )
-    eachPath( 42, assert.fail )
-    eachPath( undefined, assert.fail )
-    eachPath( 'foo', assert.fail )
-    eachPath( null, assert.fail )
+  it('will call callback once for primitives', function () {
+    const data = 42
+
+    var calls = 0
+
+    eachPath( data, function ( value, path ) {
+      assert.deepEqual( path, [] )
+      assert.equal( value, data )
+      calls++
+    } )
+
+    assert.equal( calls, 1 )
   })
 })

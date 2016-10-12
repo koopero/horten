@@ -1,28 +1,55 @@
-module.exports = Mutant
+'use strict'
+module.exports = MutantFactory
 
 const path = require('./path')
     , simple = path.simple
     , resolve = path.resolve
     , split = path.split
+    , slice = path.slice
     , blank = path.blank
     , hasKeys = require('./hasKeys')
     , eachKey = require('./eachKey')
     , eachPath = require('./eachPath')
+    , wrap = require('./wrap')
     , isDefined = ( val ) => 'undefined' != typeof val
     , isArray = val => Array.isArray( val )
+    , EventEmitter = require('events')
 
-Mutant.isMutant = ( val ) => val instanceof Mutant
+class Mutant extends EventEmitter {
+  constructor ( initial ) {
+    super()
+    const self = this
+    this._initial = initial
+    this._value = initial
 
-function Mutant( initial ) {
+    this.on('change', function () {
+      if ( self.listenerCount( 'value' ) )
+        self.emit('value', self.get() )
+    })
+  }
 
-  if ( Mutant.isMutant( initial ) )
-    initial = initial.get()
+  get path() {
+    return this._path
+  }
 
-  self = Object.create( Mutant.prototype )
-  self._initial = initial
-  self._value = initial
-  return self
+  get parent() {
+    return this._parent
+  }
+
+  get root() {
+    return this._root = this._root || this
+  }
 }
+
+function MutantFactory( init )  {
+  if ( MutantFactory.isMutant( init ) )
+    init = init.get()
+
+  return new Mutant( init )
+}
+
+MutantFactory.isMutant = Mutant.isMutant = ( val ) => val instanceof Mutant
+
 
 Mutant.prototype.result = function () {
   const self = this
@@ -62,14 +89,16 @@ Mutant.prototype.result = function () {
   return self._value
 
   function copy() {
+
     if ( isArray( self._value ) ) {
       self._value = Object.assign( [], self._value, subResults )
-    } else {
+    } else if ( hasKeys( self._value ) ) {
       self._value = Object.assign( {}, self._value, subResults )
+    } else {
+      self._value = {}
     }
 
     isClone = true
-
   }
 }
 
@@ -106,13 +135,22 @@ Mutant.prototype.isDirty = function () {
 
 Mutant.prototype.subMutant = function ( key ) {
   if ( !hasKeys( this._value ) ) {
-    this._value = {}
+    // this._value = {}
   }
 
   if ( !this._subMutants )
     this._subMutants = {}
 
-  return this._subMutants[key] = this._subMutants[key] || new Mutant( this._value[key] )
+  var sub = this._subMutants[key]
+
+  if ( !sub ) {
+    sub = new Mutant( hasKeys( this._value ) ? this._value[key] : undefined )
+    sub._path = split( this.path, key )
+    sub._root = this.root
+    sub._parent = this
+  }
+
+  return this._subMutants[key] = sub
 }
 
 Mutant.prototype.get = function () {
@@ -130,57 +168,66 @@ Mutant.prototype.get = function () {
 
 Mutant.prototype.patch = function ( value, path ) {
   const self = this
-  path = split.apply( null, Array.prototype.slice.call(arguments, 1 ) )
+  path = slice( arguments, 1 )
 
   if ( Mutant.isMutant( value ) )
     value = value.get()
+  else
+    Object.freeze( value )
 
-  // console.log( 'Mutant.patch!', value, path, this )
+  var delta
 
   if ( blank( path ) ) {
     if ( 'undefined' == typeof value )
-      return false
-
-    // if ( 'undefined' == typeof self._initial )
-    //   self._initial = value
-
+      return
 
     if ( hasKeys( value ) && hasKeys( this._value ) ) {
 
       eachKey( value, function ( subVal, key ) {
         const sub = self.subMutant( key )
-        sub.patch( subVal )
+            , subDelta = sub.patch( subVal )
+
+        if ( subDelta === undefined )
+          return
+
+        delta = delta || {}
+        delta[key] = subDelta
       } )
+
+      if ( delta ) {
+        Object.freeze( delta )
+        self.emit('delta', delta )
+        self.emit('change')
+        return delta
+      }
 
     } else if ( this._value != value ) {
       this._value = value
-      return true
+      self.emit('delta', value )
+      self.emit('change')
+      return value
     }
 
-    return false
-  } else if ( simple( path ) ) {
-
-    var key = path[0]
-
-    if ( !this._subMutants && hasKeys( this._value ) ) {
-      var currentValue = this._value[ key ]
-      if ( value == currentValue )
-        return false
-    }
-
-    const submutant = this.subMutant( key )
-    return submutant.patch( value )
+    return
   } else {
     var key = path[0]
 
     var sub = this.subMutant( key )
-    return sub.patch( value, path.slice( 1 ) )
+    delta = sub.patch( value, path.slice( 1 ) )
+    if ( delta === undefined )
+      return
+
+    delta = wrap( delta, key )
+    self.emit('delta', delta )
+    self.emit('change')
+    return delta
   }
 
 }
 
 
 Mutant.prototype.set = function ( value, path ) {
+  const self = this
   path = split.apply( null, Array.prototype.slice.call(arguments, 1 ) )
 
   if ( Mutant.isMutant( value ) )
@@ -189,10 +236,12 @@ Mutant.prototype.set = function ( value, path ) {
   if ( blank( path ) ) {
     if ( this._value != value ) {
       this._value = value
-      return true
+      self.emit('delta', value )
+      self.emit('change')
+      return value
     }
 
-    return false
+    return
   } else if ( simple( path ) ) {
     var key = path[0]
     if ( !this._subMutants && hasKeys( this._value ) ) {

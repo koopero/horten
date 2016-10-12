@@ -1,6 +1,8 @@
 const test = exports
+    , assert = require('chai').assert
+    , path = require('../src/path')
 
-test.assert = require('chai').assert
+test.assert = assert
 
 test.wrapEqual = function( func ) {
   return function( args, expect, desc ) {
@@ -26,4 +28,8 @@ test.wrapEquiv = function( func ) {
     })
 
   }
+}
+
+test.assertPathEqual = function ( a, b, mesg ) {
+  assert.deepEqual( path.string( a ), path.string( b ), mesg )
 }

@@ -5,7 +5,7 @@ const isString = ( val ) => 'string' == typeof val
 
 const SEP = '/'
 
-
+const SPLIT_RESULT = Symbol('SPLIT_RESULT')
 
 path.sep = SEP
 
@@ -60,9 +60,23 @@ path.slice = function ( arr, start ) {
 }
 
 path.split = function () {
-  const result = []
+  //
+  // Shortcuts
+  //
+  if ( arguments.length == 1
+    && Array.isArray( arguments[0] )
+    && arguments[0][SPLIT_RESULT]
+  )
+    return arguments[0]
 
+  //
+  // Do the actual work
+  //
+
+  const result = []
   array( arguments )
+  Object.freeze( result )
+  result[ SPLIT_RESULT ] = true
 
   return result
 
@@ -134,3 +148,5 @@ path.resolve = function () {
     result = result + tok + SEP
   }
 }
+
+path.string = path.resolve 
