@@ -6,7 +6,7 @@ const test = require('./_test')
 
 const Mutant = require('../src/Mutant')
 
-describe('Cursor', function () {
+describe('Cursor', () => {
   const Cursor = require('../src/Cursor')
 
   it('will not smork', () => {
@@ -57,10 +57,134 @@ describe('Cursor', function () {
     assert.equal( root.get( 'foo', 'bar'), ref )
   })
 
-  it('will send events', () => {
+  it('will send events without delay', () => {
     const root = new Mutant( )
         , cursor = new Cursor()
 
-    cursor.on('change')
+    var calls = 0
+    cursor.on('change', () => {
+      calls ++
+    })
+
+    cursor.mutant = root
+    cursor.listening = true
+    cursor.delay = 0
+
+    root.set( 42 )
+    assert.equal( calls, 1 )
   })
+
+  it('will delay events', ( cb ) => {
+    const root = new Mutant( )
+        , cursor = new Cursor()
+
+    var calls = 0
+    cursor.on('change', () => {
+      calls++
+    })
+
+    cursor.mutant = root
+    cursor.listening = true
+    cursor.delay = 30
+
+    root.set( 1 )
+    root.set( 2 )
+    root.set( 3 )
+    root.set( 4 )
+
+    assert.equal( calls, 0 )
+
+    setTimeout( function () {
+      assert.equal( calls, 0 )
+    }, 10 )
+
+    setTimeout( function () {
+      assert.equal( calls, 1 )
+      cb()
+    }, 50 )
+  })
+
+  it('will accumulate deltas', ( cb ) => {
+    const root = new Mutant( { foo: 'bar' } )
+        , cursor = new Cursor()
+        , time = 30
+
+    var calls = 0
+
+
+    cursor.mutant = root
+    cursor.listening = true
+    cursor.delay = time
+
+    root.set( 'bar', 'foo' ) // Doesn't set anything, no delta
+    assert.equal( calls, 0 )
+
+    setTimeout( function () {
+      root.patch( 42, 'baz')
+      assert.equal( calls, 0 )
+    }, time / 4 )
+
+    setTimeout( function () {
+      root.patch( 123, 'bop' )
+      assert.equal( calls, 0 )
+    }, time / 2 )
+
+    cursor.on('delta', ( delta ) => {
+      assert.deepEqual( delta, { baz: 42, bop: 123 } )
+      cb()
+    })
+  })
+
+  it('will receive delta from subMutant', ( cb ) => {
+    const root = new Mutant()
+        , sub = root.walk('foo')
+        , cursor = new Cursor()
+
+    cursor.mutant = root
+    cursor.listening = true
+    cursor.delay = 0
+
+    cursor.on('delta', ( delta ) => {
+      assert.deepEqual( delta, { foo: 'bar' } )
+      cb()
+    })
+
+    sub.set('bar')
+  })
+
+  it('will receive value from subMutant', ( cb ) => {
+    const root = new Mutant()
+        , sub = root.walk('foo')
+        , cursor = new Cursor()
+
+    cursor.mutant = root
+    cursor.listening = true
+    cursor.delay = 0
+
+    cursor.on('value', ( value ) => {
+      assert.deepEqual( value, { foo: 'bar' } )
+      cb()
+    })
+
+    sub.set('bar')
+  })
+
+  it('will reject echos', () => {
+    const root = new Mutant()
+        , cursor = new Cursor()
+
+    cursor.mutant = root
+    cursor.listening = true
+    cursor.delay = 0
+    // cursor.echo = false
+
+    cursor.on('delta', ( delta ) => {
+      console.error(delta)
+      assert.fail('It echoed')
+    })
+
+    // cursor.patch('bar', 'foo' )
+    cursor.patch('bar', 'foo' )
+  })
+
 })

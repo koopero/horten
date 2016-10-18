@@ -4,13 +4,16 @@ const Mutant = require('./Mutant')
 
 function Echo() {
   const self = Object.create( Echo.prototype )
-      , echo = Mutant( {} )
+      , echo = new Mutant( {} )
 
   self.send = function( data ) {
+    // console.log('Echo.send', data )
     echo.patch( data )
   }
 
   self.receive = function ( data ) {
+    // console.trace('Echo.receive', data )
+
     data = Mutant( data )
 
     echo.eachPath( function ( value, path ) {
@@ -22,7 +25,8 @@ function Echo() {
       echo.del( path )
     })
 
-    return data.get()
+    var delta = data.get()
+    return delta
   }
 
   return self

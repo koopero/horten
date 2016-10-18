@@ -149,4 +149,16 @@ path.resolve = function () {
   }
 }
 
-path.string = path.resolve 
+path.string = path.resolve
+
+path.equal = function ( a, b ) {
+  if ( arguments.length < 1 )
+    throw new Error('Insufficient arguments')
+
+  var k = arguments.length - 1
+  for ( var i = 0; i < k; i ++  )
+    if ( path.string( arguments[i] ) != path.string( arguments[i+1] ) )
+      return false
+
+  return true
+}

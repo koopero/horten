@@ -169,16 +169,21 @@ describe('Mutant', function() {
     })
 
     describe('will emit delta', function () {
-      it('for object changes', function () {
+      it('for object changes', ( cb ) => {
         const mutant = Mutant( { foo: 42 } )
         var calls = 0
-        mutant.once('delta', function ( delta ) {
+        mutant.on('delta', function ( delta ) {
           assert.deepEqual( delta, { bar: 123 } )
           calls++
         } )
 
         mutant.patch( { foo: 42, bar: 123 } )
-        assert.equal( calls, 1 )
+
+        setTimeout( () => {
+          assert.equal( calls, 1 )
+          cb()
+        }, 50 )
+
       })
     })
 
@@ -225,7 +230,7 @@ describe('Mutant', function() {
 
     it('will set the value', function () {
       const mutant = new Mutant()
-      value = 'foo'
+      const value = 'foo'
       const result = mutant.set( value )
       // assert.equal( result, true )
       assert.equal( mutant.result(), value )

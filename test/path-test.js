@@ -130,4 +130,13 @@ describe('path', () => {
 
   })
 
+  describe('equal', () => {
+    const equal = path.equal
+    it('works', () => {
+      assert.equal( equal('foo/', ['foo'] ), true )
+      assert.equal( equal('foo/', [] ), false )
+
+    })
+  })
+
 })

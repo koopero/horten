@@ -1,12 +1,12 @@
 'use strict'
 module.exports = MutantFactory
 
-const path = require('./path')
-    , simple = path.simple
-    , resolve = path.resolve
-    , split = path.split
-    , slice = path.slice
-    , blank = path.blank
+const pathlib = require('./path')
+    , simple = pathlib.simple
+    , resolve = pathlib.resolve
+    , split = pathlib.split
+    , slice = pathlib.slice
+    , blank = pathlib.blank
     , hasKeys = require('./hasKeys')
     , eachKey = require('./eachKey')
     , eachPath = require('./eachPath')
@@ -15,20 +15,22 @@ const path = require('./path')
     , isArray = val => Array.isArray( val )
     , EventEmitter = require('events')
 
+const EMIT = Symbol('EMIT')
+    , SUB_DELTA = Symbol('SUB_DELTA')
+    , _patchingSub = Symbol()
+
 class Mutant extends EventEmitter {
   constructor ( initial ) {
     super()
     const self = this
     this._initial = initial
     this._value = initial
-
-    this.on('change', function () {
-      if ( self.listenerCount( 'value' ) )
-        self.emit('value', self.get() )
-    })
   }
 
   get path() {
+    if ( !this._path ) {
+      this._path = []
+    }
     return this._path
   }
 
@@ -38,6 +40,10 @@ class Mutant extends EventEmitter {
 
   get root() {
     return this._root = this._root || this
+  }
+
+  get key() {
+    return pathlib.last( this._path )
   }
 }
 
@@ -58,12 +64,9 @@ Mutant.prototype.result = function () {
   var value = this.value
     , isClone = false
 
-  // console.warn('result', self )
   if ( self._subMutants ) {
 
     eachKey( self._subMutants, function ( sub, key ) {
-      // console.warn('sub', sub )
-
       if ( !sub.isDirty() )
         return
 
@@ -184,8 +187,11 @@ Mutant.prototype.patch = function ( value, path ) {
     if ( hasKeys( value ) && hasKeys( this._value ) ) {
 
       eachKey( value, function ( subVal, key ) {
+
         const sub = self.subMutant( key )
-            , subDelta = sub.patch( subVal )
+        self[ _patchingSub ] = sub
+        const subDelta = sub.patch( subVal )
+        self[ _patchingSub ] = null
 
         if ( subDelta === undefined )
           return
@@ -195,16 +201,13 @@ Mutant.prototype.patch = function ( value, path ) {
       } )
 
       if ( delta ) {
-        Object.freeze( delta )
-        self.emit('delta', delta )
-        self.emit('change')
+        this[ EMIT ].delta.call( self, delta )
         return delta
       }
 
     } else if ( this._value != value ) {
       this._value = value
-      self.emit('delta', value )
-      self.emit('change')
+      this[ EMIT ].delta.call( self, value )
       return value
     }
 
@@ -213,13 +216,17 @@ Mutant.prototype.patch = function ( value, path ) {
     var key = path[0]
 
     var sub = this.subMutant( key )
+    self[ _patchingSub ] = sub
     delta = sub.patch( value, path.slice( 1 ) )
+    self[ _patchingSub ] = null
+    
+
     if ( delta === undefined )
       return
 
     delta = wrap( delta, key )
-    self.emit('delta', delta )
-    self.emit('change')
+
+    this[ EMIT ].delta.call( self, delta )
     return delta
   }
 
@@ -236,8 +243,7 @@ Mutant.prototype.set = function ( value, path ) {
   if ( blank( path ) ) {
     if ( this._value != value ) {
       this._value = value
-      self.emit('delta', value )
-      self.emit('change')
+      this[ EMIT ].delta.call( self, value )
       return value
     }
 
@@ -313,6 +319,14 @@ Mutant.prototype.del = function () {
   }
 }
 
+Mutant.prototype[ SUB_DELTA ] = function ( delta, key ) {
+  if ( !this[ _patchingSub ] )
+    this[ EMIT ].delta.call( this, wrap( delta, key ) )
+
+  if ( this._parent )
+    this._parent[ SUB_DELTA ]( delta, this.key )
+}
+
 Mutant.prototype.eachPath = function ( callback, initialPath ) {
   return eachPath( this.get(), callback, initialPath )
 }
@@ -321,8 +335,22 @@ Mutant.prototype.cursor = function() {
   const Cursor = require('./Cursor')
       , cursor = Cursor()
 
-  cursor.path = this.path
   cursor.root = this.root
+  cursor.path = this.path
 
   return cursor
+}
+
+
+Mutant.prototype[ EMIT ] = {}
+Mutant.prototype[ EMIT ].delta = function ( delta ) {
+
+  this.emit('delta', delta )
+  this.emit('change')
+
+  if ( this.listenerCount( 'value' ) )
+    this.emit( 'value', this.get() )
+
+  if ( this._parent )
+    this._parent[ SUB_DELTA ]( delta, this.key )
 }

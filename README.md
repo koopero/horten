@@ -1,3 +1,8 @@
+# Conventions
+
+**Horten** does things a little differently than comparable modules.
+
+
 ## Paths
 
 **Horten** pathes are lists of **keys** which allow deep access to objects.

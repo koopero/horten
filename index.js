@@ -9,5 +9,7 @@ H.wrap = require('./src/wrap')
 H.unset = require('./src/unset')
 H.Echo = require('./src/Echo')
 H.Mutant = require('./src/Mutant')
+H.Cursor = require('./src/Cursor')
+
 
 Object.freeze( H )
