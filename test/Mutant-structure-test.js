@@ -33,7 +33,7 @@ describe('Mutant structure', function() {
       root.set( 42 )
 
       const subB = root.walk('foo')
-      
+
       assert.equal( subB, subA )
 
       assert.equal( root.get(), 42 )
@@ -41,8 +41,6 @@ describe('Mutant structure', function() {
       subA.set('baz')
 
       assert.deepEqual( root.get(), { foo: 'baz' } )
-
-
     })
   })
 })

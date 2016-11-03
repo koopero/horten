@@ -1,24 +1,15 @@
 'use strict'
 
-const SENDER = Symbol('SENDER')
-    , LISTENER = Symbol('LISTENER')
-    , LISTENER_BOUND = Symbol('LISTENER_BOUND')
-    , IMMEDIATE = Symbol('IMMEDIATE')
-    , TIMEOUT = Symbol('TIMEOUT')
+const NS = require('./namespace')
 
-const _root = Symbol('_root')
-    , _echo = Symbol('_echo')
-    , _path = Symbol('_path')
-    , _delay = Symbol('_delay')
-    , _delayTime = Symbol('_delayTime')
-    , _delta = Symbol('_delta')
-    , _mutant = Symbol('_mutant')
-    , _listening = Symbol('_listening')
-    , _listenNames = ['delta']
+const now = () => { new Date().getTime() }
+
+const _listenNames = ['delta']
     , _listenKeys = {}
 
 
-_listenNames.forEach( ( name ) => _listenKeys[name] = Symbol( name ) )
+
+_listenNames.forEach( function ( name ) { _listenKeys[name] = Symbol( name ) } )
 
 const EventEmitter = require('events')
     , assert = require('assert')
@@ -30,104 +21,129 @@ const split = require('./path').split
     , Mutant = require('./Mutant')
     , Echo = require('./Echo')
     , isEmpty = require('./isEmpty')
+    , hasKeys = require('./hasKeys')
 
 class Cursor extends EventEmitter {
-  constructor () {
+  constructor ( config ) {
     super()
     const self = this
 
-    self[_delta] = new Mutant()
-    self[_echo] = new Echo()
+    this[ NS.held ] = {}
 
-    self[LISTENER_BOUND] = {}
-    eachKey( self[LISTENER], ( listener, name ) =>
-      self[LISTENER_BOUND][name] = listener.bind( self )
-    )
 
-    //
-    // These will be populated by returns
-    // of setImmediate() and setTimeout,
-    // respectively.
-    //
-    self[IMMEDIATE] = {}
-    self[TIMEOUT] = {}
+    self[ NS.delta ] = new Mutant()
+    self[ NS.echo ] = new Echo()
+    self[ NS.hold ] = false
+    self[ NS.immediate ] = null
+    self[ NS.timeout ] = null
 
+    self[ NS.listenerBound ] = {}
+    eachKey( self[NS.listener], function ( listener, name ) {
+      self[ NS.listenerBound ][name] = listener.bind( self )
+    } )
 
     self.delay = 0
+
+    if ( hasKeys( config ) )
+      self.configure( config )
+  }
+
+  configure( config ) {
+    if ( !hasKeys( config ) )
+      throw new Error('Invalid arguments')
+
+    const self = this
+        , keys = [
+      'delay',
+      'listening',
+      'hold',
+      'root',
+      'path',
+      'mutant'
+    ]
+
+    keys.forEach( ( key ) => {
+      if ( 'undefined' !== typeof config[key] )
+        self[key] = config[key]
+    } )
   }
 
   set listening ( value ) {
     const self = this
     value = !!value
 
-    const current = self[_listening]
-        , mutant = self[_mutant]
+    const current = self[ NS.listening ]
+        , mutant = self[ NS.mutant ]
 
     if ( mutant && value && !current ) {
-      eachKey( self[LISTENER_BOUND], ( listener, name ) => {
+      eachKey( self[ NS.listenerBound ], function ( listener, name ) {
         mutant.on( name, listener )
       })
     }
 
     if ( mutant && !value && current ) {
-      eachKey( self[LISTENER_BOUND], ( listener, name ) => {
-        mutant.off( name, listener )
+      eachKey( self[ NS.listenerBound ], function ( listener, name ) {
+        mutant.removeEventListener( name, listener )
       })
     }
 
-    self[_listening] = value
+    self[ NS.listening ] = value
   }
 
   get listening () {
-    return this[_listening]
+    return this[ NS.listening ]
   }
 
   set mutant( newMutant ) {
-    var mutant = this[_mutant]
+    var mutant = this[ NS.mutant ]
 
-    if ( !Mutant.isMutant( newMutant ) )
+    if ( !Mutant.isMutant( newMutant ) ) {
+      throw new Error("Mutant imposter!")
       newMutant = null
+    }
 
     if ( newMutant != mutant ) {
       var wasListening = this.listening
       this.listening = false
-      this[_mutant] = newMutant
+      this[ NS.mutant ] = newMutant
       this.listening = wasListening
     }
 
   }
 
   get mutant() {
-    if ( !this[_mutant] ) {
+    if ( !this[ NS.mutant ] ) {
       this.mutant = this.root
     }
-    return this[_mutant]
+    return this[ NS.mutant ]
   }
 
   set path( value ) {
     value = split( value )
     this.mutant = this.root.walk( value )
-    this[_path] = value
+    this[ NS.path ] = value
   }
 
   get path() {
-    return this[_path]
+    return this[ NS.path ] || []
   }
 
   set root( value ) {
-    this[_root] = value
+    this[ NS.root ] = value
+    if ( !this[ NS.mutant ] )
+      this.path = this.path
   }
 
   get root() {
-    if ( !this[_root] ) {
-      this[_root] = require('./root')
+    if ( !this[ NS.root ] ) {
+      this[ NS.root ] = require('./root')
     }
-    return this[_root]
+    return this[ NS.root ]
   }
 
   set value( value ) {
-    if ( this[_echo] )
-      this[_echo].send( value )
+    if ( this[ NS.echo ] )
+      this[ NS.echo ].send( value )
 
     this.mutant.set( value )
   }
@@ -137,11 +153,78 @@ class Cursor extends EventEmitter {
   }
 
   set delay( value ) {
-    this[_delayTime] = Math.max( -1, parseInt( value ) || 0 )
+    this[ NS.delayTime ] = Math.max( -1, parseInt( value ) || 0 )
   }
 
   get delay() {
-    return this[_delayTime]
+    return this[ NS.delayTime ]
+  }
+
+  set hold( value ) {
+    value = !!value
+    const oldValue = this[ NS.hold ]
+    this[ NS.hold ] = value
+
+    if ( !value && oldValue ) {
+      this[ NS.clearTimers ]()
+    } else if ( oldValue && !value ) {
+      this.trigger()
+    }
+  }
+
+  get hold() {
+    return this[ NS.hold ]
+  }
+
+  trigger( forceDelay ) {
+    const self = this
+        , delay = self[ NS.delayTime ]
+
+    if ( self[ NS.hold ] )
+      return false
+
+    self[ NS.clearTimers ]()
+    const release = self.release.bind( self )
+
+    if ( delayIsTimeout( delay ) ) {
+      self[ NS.timeout ] = setTimeout( release, delay )
+    } else if ( delayIsImmediate( delay ) && forceDelay ) {
+      self[ NS.immediate ] = setImmediate( release )
+    } else {
+      release()
+    }
+  }
+
+  release() {
+    const self = this
+        , held = self[ NS.held ]
+
+    if ( self[ NS.releasing ] )
+      console.warn('Reentrant release.')
+
+    var delta = this[ NS.delta ].get()
+
+    self[ NS.delta ].del()
+    self[ NS.held ] = {}
+    self[ NS.clearTimers ]()
+    self[ NS.releaseTime ] = now()
+    self[ NS.releasing ] = true
+
+
+    if ( held.change )
+      this.emit( 'change' )
+
+    if ( held.value )
+      this.emit( 'value', this.value )
+
+    if ( self[ NS.echo ] ) {
+      delta = self[ NS.echo ].receive( delta )
+    }
+
+    if ( delta !== undefined && !( hasKeys( delta ) && isEmpty( delta ) ) )
+      this.emit( 'delta', delta )
+
+    self[ NS.releasing ] = false
   }
 
   //
@@ -151,9 +234,9 @@ class Cursor extends EventEmitter {
     const path = slice( arguments, 1 )
         , mutant = this.mutant
 
-    if ( this[ _echo ] )
-      this[ _echo ].send( wrap( value, path ) )
-      
+    if ( this[ NS.echo ] )
+      this[ NS.echo ].send( wrap( value, path ) )
+
     return mutant.patch.apply( mutant, arguments )
   }
 
@@ -164,91 +247,31 @@ class Cursor extends EventEmitter {
 
 }
 
-//
-// Master delay function
-//
-
-Cursor.prototype[ _delay ] = function ( name ) {
-  const self = this
-      , sender = self[ SENDER ][ name ].bind( self )
-      , delay = self[_delayTime]
-
-  assert( sender )
-
-  remove()
-  if ( delayIsTimeout( delay ) ) {
-    self[ TIMEOUT ][ name ] = setTimeout( resolve, delay )
-  } else if ( delayIsImmediate( delay ) ) {
-    self[ IMMEDIATE ][ name ] = setImmediate( resolve )
-  } else {
-    resolve()
+Cursor.prototype[ NS.clearTimers ] = function() {
+  if ( this[ NS.immediate ] ) {
+    clearImmediate( this[ NS.immediate ] )
+    this[ NS.immediate ] = null
   }
 
-  return
-
-  function resolve() {
-    remove()
-    sender()
-  }
-
-  function remove() {
-    if ( self[ IMMEDIATE ][ name ] ) {
-      clearImmediate( self[ IMMEDIATE ][ name ] )
-      self[ IMMEDIATE ][ name ] = null
-    }
-
-    if ( self[ TIMEOUT ][ name ] ) {
-      clearTimeout( self[ TIMEOUT ][ name ] )
-      self[ TIMEOUT ][ name ] = null
-    }
+  if ( this[ NS.timeout ] ) {
+    clearTimeout( this[ NS.timeout ] )
+    this[ NS.timeout ] = null
   }
 }
 
+
 //
-//
+// Listeners upon Mutant
 //
 
-Cursor.prototype[ LISTENER ] = {}
+Cursor.prototype[ NS.listener ] = {}
 
-Cursor.prototype[ LISTENER ].delta = function ( delta ) {
-  this[_delta].patch( delta )
-  this[_delay]( 'delta' )
+Cursor.prototype[ NS.listener ].delta = function ( delta ) {
+  this[ NS.delta ].patch( delta )
+  this[ NS.held ].change = true
+  this[ NS.held ].value  = true
+  this.trigger()
 }
-
-Cursor.prototype[ LISTENER ].change = function () {
-  this[_delay]( 'change' )
-  this[_delay]( 'value' )
-}
-
-
-//
-//
-//
-Cursor.prototype[ SENDER ] = {}
-
-Cursor.prototype[ SENDER ].delta = function () {
-  var delta = this[_delta].get()
-  this[_delta].del()
-
-  if ( this[_echo] ) {
-    delta = this[_echo].receive( delta )
-    if ( isEmpty( delta ) )
-      return
-  }
-
-  // if ( delta !== undefined )
-    this.emit( 'delta', delta )
-}
-
-Cursor.prototype[ SENDER ].change = function () {
-  this.emit( 'change' )
-}
-
-Cursor.prototype[ SENDER ].value = function () {
-  if ( this.listenerCount('value') )
-    this.emit( 'value', this.value )
-}
-
 
 module.exports = Cursor
 

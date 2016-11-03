@@ -5,14 +5,30 @@ const test = require('./_test')
     , assertPathEqual = test.assertPathEqual
 
 const Mutant = require('../src/Mutant')
+    , eachKey = require('../src/eachKey')
 
 describe('Cursor', () => {
   const Cursor = require('../src/Cursor')
 
-  it('will not smork', () => {
-    const cursor = new Cursor()
+  describe('constructor', () => {
+    it('will not smork', () => {
+      const cursor = new Cursor()
+    })
+
+    it('will init options', () => {
+      const root = new Mutant()
+          , options = {
+            root: root
+          }
+          , cursor = new Cursor( options )
+
+      eachKey( options, ( value, key ) => {
+        assert.equal( cursor[key], options[key] )
+      })
+    })
 
   })
+
 
   it('will attach to root ', () => {
     const root = new Mutant()
@@ -179,12 +195,60 @@ describe('Cursor', () => {
     // cursor.echo = false
 
     cursor.on('delta', ( delta ) => {
-      console.error(delta)
       assert.fail('It echoed')
     })
 
     // cursor.patch('bar', 'foo' )
     cursor.patch('bar', 'foo' )
+  })
+
+  describe('.hold', () => {
+    it('will be off by default', () => {
+      const cursor = new Cursor()
+      assert.equal( cursor.hold, false )
+    })
+
+    it('will always be boolean', () => {
+      const cursor = new Cursor({
+        hold: 'yes'
+      })
+      assert.equal( cursor.hold, true )
+
+      cursor.hold = null
+      assert.equal( cursor.hold, false )
+      
+      cursor.hold = 1
+      assert.equal( cursor.hold, true )
+
+      cursor.hold = 0
+      assert.equal( cursor.hold, false )
+    })
+
+    it('will hold events until release', () => {
+      const root = new Mutant()
+          , cursor = new Cursor()
+          , data = { foo: 'bar' }
+
+      var calls = 0
+
+      cursor.on('delta', function ( result ) {
+        calls ++
+        assert.deepEqual( result, data )
+      })
+
+      cursor.root = root
+      cursor.listening = true
+      cursor.delay = 0
+      cursor.hold = true
+
+      root.patch( data )
+
+      assert.equal( calls, 0 )
+
+      cursor.release()
+
+      assert.equal( calls, 1 )
+    })
   })
 
 })

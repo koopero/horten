@@ -1,5 +1,6 @@
 const H = exports
 
+H.NS = require('./src/namespace')
 H.root = require('./src/root')
 H.path = require('./src/path')
 H.compose = require('./src/compose')
@@ -13,3 +14,10 @@ H.Cursor = require('./src/Cursor')
 
 
 Object.freeze( H )
+
+
+//
+// Add global.
+//
+
+global.H = H
