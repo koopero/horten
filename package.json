@@ -1,6 +1,6 @@
 {
   "name": "horten",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "The ultimate global variable.",
   "main": "index.js",
   "directories": {

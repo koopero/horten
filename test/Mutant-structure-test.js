@@ -15,7 +15,7 @@ describe('Mutant structure', function() {
 
     it('walks to sub', function () {
       const mutant = Mutant()
-          , path = 'foo/bar/'
+          , path = test.path()
           , sub = mutant.walk( path )
 
       assertPathEqual( sub.path, path )

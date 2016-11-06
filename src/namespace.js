@@ -4,6 +4,8 @@ module.exports = NS
 const keys = [
   'isMutant',
   'mutate',
+  'mutating',
+  'mutation',
   'listener',
   'listenerBound',
   'sender',
@@ -20,7 +22,14 @@ const keys = [
   'clearTimers',
   'hold',
   'held',
-  'releasing'
+  'releasing',
+  'onSubMutate',
+  'parent',
+  'value',
+  'initial',
+  'subs',
+  'key',
+  'emit'
 ]
 
 keys.forEach( ( key ) =>

@@ -6,6 +6,7 @@ const test = require('./_test')
 
 const Mutant = require('../src/Mutant')
     , eachKey = require('../src/eachKey')
+    , wrap = require('../src/wrap')
 
 describe('Cursor', () => {
   const Cursor = require('../src/Cursor')
@@ -202,6 +203,42 @@ describe('Cursor', () => {
     cursor.patch('bar', 'foo' )
   })
 
+  describe('events', () => {
+    it('delta from upstream mutant', ( cb ) => {
+      const root = new Mutant()
+          , path = test.path()
+          , child = root.walk( path )
+          , data = test.data()
+          , cursor = new Cursor( {
+            root: root,
+            listening: true,
+            delay: 0,
+            onDelta: onDelta
+          } )
+
+      // console.log('path',path)
+
+
+      assert.equal( cursor.mutant, root )
+      assert.equal( cursor.mutant.walk( path ), child )
+      assert.notEqual( child, root )
+      assert.deepEqual( child.path, path )
+
+      var calls = 0
+      function onDelta( delta ) {
+        assert.deepEqual( delta, wrap( data, path ) )
+        calls++
+      }
+
+      child.set( data )
+
+      setTimeout( () => {
+        assert.equal( calls, 1 )
+        cb()
+      }, 10 )
+    })
+  })
+
   describe('.hold', () => {
     it('will be off by default', () => {
       const cursor = new Cursor()
@@ -216,7 +253,7 @@ describe('Cursor', () => {
 
       cursor.hold = null
       assert.equal( cursor.hold, false )
-      
+
       cursor.hold = 1
       assert.equal( cursor.hold, true )
 

@@ -17,7 +17,6 @@ const NS = require('./namespace')
     , isArray = val => {Array.isArray( val )}
 
 const EMIT = Symbol('EMIT')
-    , SUB_DELTA = Symbol('SUB_DELTA')
     , _patchingSub = Symbol()
 
 class Mutant extends EventEmitter {
@@ -25,27 +24,32 @@ class Mutant extends EventEmitter {
     super()
     this[ NS.isMutant ] = true
     const self = this
-    this._initial = initial
-    this._value = initial
+    this[ NS.initial ] = initial
+    this[ NS.value ] = initial
+    // console.log('new', this[ NS.value ] )
   }
 
   get path() {
-    if ( !this._path ) {
-      this._path = []
+    if ( !this[ NS.path ] ) {
+      this[ NS.path ] = []
     }
-    return this._path
-  }
-
-  get parent() {
-    return this._parent
-  }
-
-  get root() {
-    return this._root = this._root || this
+    return this[ NS.path ]
   }
 
   get key() {
-    return pathlib.last( this._path )
+    return this[ NS.key ]
+  }
+
+  get parent() {
+    return this[ NS.parent ]
+  }
+
+  get root() {
+    return this[ NS.root ] = this[ NS.root ] || this
+  }
+
+  get key() {
+    return pathlib.last( this[ NS.path ] )
   }
 }
 
@@ -69,41 +73,41 @@ Mutant.prototype.result = function () {
   var value = this.value
     , isClone = false
 
-  if ( self._subMutants ) {
+  if ( self[ NS.subs ] ) {
 
-    eachKey( self._subMutants, function ( sub, key ) {
+    eachKey( self[ NS.subs ], function ( sub, key ) {
       if ( !sub.isDirty() )
         return
 
       const subResult = sub.result()
       if ( 'undefined' != typeof subResult ) {
 
-        if ( !isClone || !hasKeys( self._value ) ) {
+        if ( !isClone || !hasKeys( self[ NS.value ] ) ) {
           copy()
         }
 
-        subResults[key] = self._value[key] = subResult
+        subResults[key] = self[ NS.value ][key] = subResult
       } else if ( sub._deleted ) {
 
         delete subResults[key]
-        if ( hasKeys( self._value ) && !isClone ) {
+        if ( hasKeys( self[ NS.value ] ) && !isClone ) {
           copy()
-          delete self._value[key]
+          delete self[ NS.value ][key]
         }
       }
     })
   }
 
-  return self._value
+  return self[ NS.value ]
 
   function copy() {
 
-    if ( isArray( self._value ) ) {
-      self._value = Object.assign( [], self._value, subResults )
-    } else if ( hasKeys( self._value ) ) {
-      self._value = Object.assign( {}, self._value, subResults )
+    if ( isArray( self[ NS.value ] ) ) {
+      self[ NS.value ] = Object.assign( [], self[ NS.value ], subResults )
+    } else if ( hasKeys( self[ NS.value ] ) ) {
+      self[ NS.value ] = Object.assign( {}, self[ NS.value ], subResults )
     } else {
-      self._value = {}
+      self[ NS.value ] = {}
     }
 
     isClone = true
@@ -118,12 +122,12 @@ Mutant.prototype.compose = function () {
 }
 
 Mutant.prototype.isDirty = function () {
-  if ( this._value != this._initial )
+  if ( this[ NS.value ] != this[ NS.initial ] )
     return true
 
-  if ( this._subMutants )
-    for ( var key in this._subMutants ) {
-      if ( this._subMutants[key].isDirty() )
+  if ( this[ NS.subs ] )
+    for ( var key in this[ NS.subs ] ) {
+      if ( this[ NS.subs ][key].isDirty() )
         return true
     }
 
@@ -131,23 +135,24 @@ Mutant.prototype.isDirty = function () {
 }
 
 Mutant.prototype.subMutant = function ( key ) {
-  if ( !hasKeys( this._value ) ) {
-    // this._value = {}
+  if ( !hasKeys( this[ NS.value ] ) ) {
+    // this[ NS.value ] = {}
   }
 
-  if ( !this._subMutants )
-    this._subMutants = {}
+  if ( !this[ NS.subs ] )
+    this[ NS.subs ] = {}
 
-  var sub = this._subMutants[key]
+  var sub = this[ NS.subs ][key]
 
   if ( !sub ) {
-    sub = new Mutant( hasKeys( this._value ) ? this._value[key] : undefined )
-    sub._path = split( this.path, key )
-    sub._root = this.root
-    sub._parent = this
+    sub = new Mutant( hasKeys( this[ NS.value ] ) ? this[ NS.value ][key] : undefined )
+    sub[ NS.key ] = key
+    sub[ NS.path ] = split( this.path, key )
+    sub[ NS.root ] = this.root
+    sub[ NS.parent ] = this
   }
 
-  return this._subMutants[key] = sub
+  return this[ NS.subs ][key] = sub
 }
 
 Mutant.prototype.get = function () {
@@ -169,38 +174,14 @@ Mutant.prototype.patch = function ( value, path ) {
 }
 
 
+Mutant.prototype.merge = function ( value, path ) {
+  path = slice( arguments, 1 )
+  return this[ NS.mutate ]( value, path, { needDelta: true } ).delta
+}
+
 Mutant.prototype.set = function ( value, path ) {
-  const self = this
-  path = split.apply( null, Array.prototype.slice.call(arguments, 1 ) )
-
-  if ( Mutant.isMutant( value ) )
-    value = value.get()
-
-  if ( blank( path ) ) {
-    if ( this._value != value ) {
-      this._value = value
-      this[ EMIT ].delta.call( self, value )
-      return value
-    }
-
-    return
-  } else if ( simple( path ) ) {
-    var key = path[0]
-    if ( !this._subMutants && hasKeys( this._value ) ) {
-      var currentValue = this._value[ key ]
-      if ( value == currentValue )
-        return false
-    }
-
-    const submutant = this.subMutant( key )
-    return submutant.set( value )
-  } else {
-    var key = path[0]
-
-    var sub = this.subMutant( key )
-    return sub.set( value, path.slice( 1 ) )
-  }
-
+  path = slice( arguments, 1 )
+  return this[ NS.mutate ]( value, path, { needDelta: true } ).changed
 }
 
 Mutant.prototype.map = function ( callback ) {
@@ -231,18 +212,18 @@ Mutant.prototype.walk = function () {
 }
 
 Mutant.prototype.isString = function () {
-  return typeof this._value == 'string'
+  return typeof this[ NS.value ] == 'string'
 }
 
 Mutant.prototype.isDefined = function () {
-  return typeof this._value != 'undefined'
+  return typeof this[ NS.value ] != 'undefined'
 }
 
 Mutant.prototype.del = function () {
   const path = split( arguments )
   if ( blank( path ) ) {
     if ( this.isDefined() || !this._deleted ) {
-      this._value = undefined
+      this[ NS.value ] = undefined
       this._deleted = true
       return true
     } else {
@@ -255,13 +236,6 @@ Mutant.prototype.del = function () {
   }
 }
 
-Mutant.prototype[ SUB_DELTA ] = function ( delta, key ) {
-  if ( !this[ _patchingSub ] )
-    this[ EMIT ].delta.call( this, wrap( delta, key ) )
-
-  if ( this._parent )
-    this._parent[ SUB_DELTA ]( delta, this.key )
-}
 
 Mutant.prototype.eachPath = function ( callback, initialPath ) {
   return eachPath( this.get(), callback, initialPath )
@@ -278,19 +252,6 @@ Mutant.prototype.cursor = function() {
 }
 
 
-Mutant.prototype[ EMIT ] = {}
-Mutant.prototype[ EMIT ].delta = function ( delta ) {
-
-  this.emit('delta', delta )
-  this.emit('change')
-
-  // if ( this.listenerCount( 'value' ) )
-  this.emit( 'value', this.get() )
-
-  if ( this._parent )
-    this._parent[ SUB_DELTA ]( delta, this.key )
-}
-
 Mutant.prototype[ NS.mutate ] = function ( value, path, options ) {
   const self = this
       , result = {}
@@ -302,7 +263,10 @@ Mutant.prototype[ NS.mutate ] = function ( value, path, options ) {
   options.needDelta = options.needDelta || !!self.listenerCount( 'delta')
   options.needKeys = options.needKeys || !!self.listenerCount( 'keys')
 
-
+  //
+  // Set state
+  //
+  self[ NS.mutating ] = true
 
   //
   // Preprocess value
@@ -316,7 +280,7 @@ Mutant.prototype[ NS.mutate ] = function ( value, path, options ) {
 
     if ( 'undefined' == typeof value ) {
 
-    } else if ( hasKeys( value ) && hasKeys( this._value ) ) {
+    } else if ( hasKeys( value ) && hasKeys( this[ NS.value ] ) ) {
 
       eachKey( value, function ( subVal, key ) {
 
@@ -332,8 +296,8 @@ Mutant.prototype[ NS.mutate ] = function ( value, path, options ) {
         result.delta[key] = subDelta
       } )
 
-    } else if ( this._value != value ) {
-      this._value = value
+    } else if ( this[ NS.value ] != value ) {
+      this[ NS.value ] = value
       result.delta = value
     }
 
@@ -350,15 +314,47 @@ Mutant.prototype[ NS.mutate ] = function ( value, path, options ) {
       result.delta = wrap( result.delta, key )
   }
 
+
   //
   // Dispatch results
   //
+
+  result.changed = result.changed || !!result.delta
+
   Object.freeze( result )
-  if ( result.delta ) {
-    Object.freeze( result.delta )
-    this[ EMIT ].delta.call( self, result.delta )
+
+  self[ NS.emit ]( result, [] )
+
+  if ( self.parent && !self.parent[ NS.mutating ] ) {
+    self.parent[ NS.onSubMutate ]( result, [ self.key ] )
   }
+
+  // console.log('mutate', self.path, value, result )
+
+  self[ NS.mutating ] = false
 
   return result
 
+}
+
+Mutant.prototype[ NS.emit ] = function ( result, path ) {
+  // console.log('EMIT', result )
+  if ( 'changed' in result ) {
+    this.emit('change')
+    this.emit( 'value', this.get() )
+  }
+
+  if ( 'delta' in result ) {
+    Object.freeze( result.delta )
+    this.emit('delta', wrap( result.delta, path ) )
+  }
+}
+
+
+Mutant.prototype[ NS.onSubMutate ] = function ( result, path ) {
+  this[ NS.emit ]( result, path )
+
+  if ( this.parent ) {
+    this.parent[ NS.onSubMutate ]( result, split( this.key, path ) )
+  }
 }

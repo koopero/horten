@@ -33,3 +33,34 @@ test.wrapEquiv = function( func ) {
 test.assertPathEqual = function ( a, b, mesg ) {
   assert.deepEqual( path.string( a ), path.string( b ), mesg )
 }
+
+
+const DATA_KEYS = ['echelon','cadillac','funfur','stakeout','vulcan','verbiage']
+
+test.data = function() {
+  const result = {}
+  for ( var i = 0; i < 3; i ++ ) {
+    var ind = Math.floor( DATA_KEYS.length * Math.random() )
+      , key = DATA_KEYS[ind]
+
+    result[key] = Math.round( Math.random() * 4 ) * Math.pow( 2, Math.round( Math.random() * 8 - 3 ) )
+  }
+
+  return result
+}
+
+const PATH_KEYS = ['computron','oscillator','ostrich','oven','other']
+
+test.path = function() {
+  var result = []
+    , length = Math.round( Math.random() * 2 ) + 1
+
+  for ( var i = 0; i < length; i ++ ) {
+    var ind = Math.floor( PATH_KEYS.length * Math.random() )
+      , key = PATH_KEYS[ind]
+
+    result.push( key )
+  }
+
+  return result
+}

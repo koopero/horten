@@ -7,7 +7,7 @@ const now = () => { new Date().getTime() }
 const _listenNames = ['delta']
     , _listenKeys = {}
 
-
+const EVENT_NAMES = ['delta','change','value']
 
 _listenNames.forEach( function ( name ) { _listenKeys[name] = Symbol( name ) } )
 
@@ -55,17 +55,24 @@ class Cursor extends EventEmitter {
     const self = this
         , keys = [
       'delay',
-      'listening',
       'hold',
       'root',
       'path',
-      'mutant'
+      'mutant',
+      'listening'
     ]
 
     keys.forEach( ( key ) => {
       if ( 'undefined' !== typeof config[key] )
         self[key] = config[key]
     } )
+
+    EVENT_NAMES.forEach( ( eventName ) => {
+      const listenerName = 'on' + eventName.slice( 0, 1 ).toUpperCase() + eventName.slice( 1 )
+      if ( config[listenerName] )
+        self.on( eventName, config[listenerName] )
+    })
+
   }
 
   set listening ( value ) {
@@ -139,17 +146,6 @@ class Cursor extends EventEmitter {
       this[ NS.root ] = require('./root')
     }
     return this[ NS.root ]
-  }
-
-  set value( value ) {
-    if ( this[ NS.echo ] )
-      this[ NS.echo ].send( value )
-
-    this.mutant.set( value )
-  }
-
-  get value() {
-    return this.mutant.get()
   }
 
   set delay( value ) {
@@ -240,10 +236,34 @@ class Cursor extends EventEmitter {
     return mutant.patch.apply( mutant, arguments )
   }
 
+  merge( value ) {
+    const path = slice( arguments, 1 )
+        , mutant = this.mutant
+
+    if ( this[ NS.echo ] )
+      this[ NS.echo ].send( wrap( value, path ) )
+
+    return mutant.merge.apply( mutant, arguments )
+  }
+
+
   get( path ) {
     const mutant = this.mutant
     return mutant.get.apply( mutant, arguments )
   }
+
+
+  set value( value ) {
+    if ( this[ NS.echo ] )
+      this[ NS.echo ].send( value )
+
+    this.mutant.set( value )
+  }
+
+  get value() {
+    return this.mutant.get()
+  }
+
 
 }
 
