@@ -35,6 +35,10 @@ test.assertPathEqual = function ( a, b, mesg ) {
 }
 
 
+test.number = () =>
+  Math.round( Math.random() * 4 ) * Math.pow( 2, Math.round( Math.random() * 8 - 3 ) )
+
+
 const DATA_KEYS = ['echelon','cadillac','funfur','stakeout','vulcan','verbiage']
 
 test.data = function() {
@@ -43,7 +47,7 @@ test.data = function() {
     var ind = Math.floor( DATA_KEYS.length * Math.random() )
       , key = DATA_KEYS[ind]
 
-    result[key] = Math.round( Math.random() * 4 ) * Math.pow( 2, Math.round( Math.random() * 8 - 3 ) )
+    result[key] = test.number()
   }
 
   return result

@@ -203,6 +203,44 @@ describe('Cursor', () => {
     cursor.patch('bar', 'foo' )
   })
 
+  it('will reject echos', () => {
+    const root = new Mutant()
+        , cursor = new Cursor()
+
+    cursor.mutant = root
+    cursor.listening = true
+    cursor.delay = 0
+    // cursor.echo = false
+
+    cursor.on('delta', ( delta ) => {
+      assert.fail('It echoed')
+    })
+
+    // cursor.patch('bar', 'foo' )
+    cursor.patch('bar', 'foo' )
+  })
+
+  it('will only send necessary delta ', () => {
+    const data = test.data()
+        , root = new Mutant( data )
+        , cursor = new Cursor()
+        , path = test.path()
+        , patch = test.number()
+        , child = root.walk( path )
+
+    cursor.mutant = root
+    cursor.listening = true
+    cursor.delay = 0
+    // cursor.echo = false
+
+    cursor.on('delta', ( delta ) => {
+      assert.deepEqual( delta, wrap( patch, path ))
+    })
+
+    // cursor.patch('bar', 'foo' )
+    child.patch( patch )
+  })
+
   describe('events', () => {
     it('delta from upstream mutant', ( cb ) => {
       const root = new Mutant()

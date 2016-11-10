@@ -2,7 +2,9 @@
 
 const NS = require('./namespace')
 
-const now = () => { new Date().getTime() }
+const now = function () { return new Date().getTime() }
+
+const setImmediate = require('setimmediate')
 
 const _listenNames = ['delta']
     , _listenKeys = {}
@@ -42,6 +44,7 @@ class Cursor extends EventEmitter {
       self[ NS.listenerBound ][name] = listener.bind( self )
     } )
 
+    self[ NS.delayMax ] = 0
     self.delay = 0
 
     if ( hasKeys( config ) )
@@ -59,7 +62,8 @@ class Cursor extends EventEmitter {
       'root',
       'path',
       'mutant',
-      'listening'
+      'listening',
+      'delayMax'
     ]
 
     keys.forEach( ( key ) => {
@@ -156,6 +160,14 @@ class Cursor extends EventEmitter {
     return this[ NS.delayTime ]
   }
 
+  set delayMax( value ) {
+    this[ NS.delayMax ] = Math.max( 0, parseInt( value ) || 0 )
+  }
+
+  get delayMax() {
+    return this[ NS.delayMax ]
+  }
+
   set hold( value ) {
     value = !!value
     const oldValue = this[ NS.hold ]
@@ -172,9 +184,23 @@ class Cursor extends EventEmitter {
     return this[ NS.hold ]
   }
 
+  set echo( value ) {
+    value = !!value
+
+    if ( value && !this[ NS.echo ] )
+      this[ NS.echo ] = new Echo()
+    else if ( !value && this[ NS.echo ] )
+      this[ NS.echo ] = null
+  }
+
+  get echo() {
+    return !!this[ NS.echo ]
+  }
+
   trigger( forceDelay ) {
     const self = this
         , delay = self[ NS.delayTime ]
+        , time = now()
 
     if ( self[ NS.hold ] )
       return false
@@ -182,7 +208,13 @@ class Cursor extends EventEmitter {
     self[ NS.clearTimers ]()
     const release = self.release.bind( self )
 
-    if ( delayIsTimeout( delay ) ) {
+    self[ NS.firstTrigger ] = self[ NS.firstTrigger ] || time
+
+    const triggerAge = time - self[ NS.firstTrigger ]
+
+    if ( self.delayMax && self.delayMax < triggerAge ) {
+      release()
+    } else if ( delayIsTimeout( delay ) ) {
       self[ NS.timeout ] = setTimeout( release, delay )
     } else if ( delayIsImmediate( delay ) && forceDelay ) {
       self[ NS.immediate ] = setImmediate( release )
@@ -197,6 +229,8 @@ class Cursor extends EventEmitter {
 
     if ( self[ NS.releasing ] )
       console.warn('Reentrant release.')
+
+    self[ NS.firstTrigger ] = 0
 
     var delta = this[ NS.delta ].get()
 

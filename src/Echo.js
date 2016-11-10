@@ -14,7 +14,7 @@ function Echo() {
   self.receive = function ( data ) {
     // console.trace('Echo.receive', data )
 
-    data = Mutant( data )
+    data = new Mutant( data )
 
     echo.eachPath( function ( value, path ) {
       const echoValue = echo.get( path )

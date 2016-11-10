@@ -13,11 +13,13 @@ const NS = require('./namespace')
     , eachPath = require('./eachPath')
     , wrap = require('./wrap')
     , EventEmitter = require('events')
-    , isDefined = ( val ) =>{ 'undefined' != typeof val}
+    , isDefined = ( val ) => 'undefined' != typeof val
     , isArray = val => {Array.isArray( val )}
 
 const EMIT = Symbol('EMIT')
     , _patchingSub = Symbol()
+
+const listenerCount = require('listenercount')
 
 class Mutant extends EventEmitter {
   constructor ( initial ) {
@@ -193,8 +195,11 @@ Mutant.prototype.map = function ( callback ) {
       var sub = self.subMutant( key )
         , result = callback( sub, key )
 
-      if ( isDefined( result ) && result != sub )
-        sub.patch( result )
+      // console.log('Map result', result, isDefined( result ), isDefined )
+
+      if ( isDefined( result ) && result != sub ) {
+        sub.set( result )
+      }
     })
   }
 
@@ -222,6 +227,12 @@ Mutant.prototype.isDefined = function () {
 Mutant.prototype.del = function () {
   const path = split( arguments )
   if ( blank( path ) ) {
+    // Delete subs
+    eachKey( this[ NS.subs ], function ( sub, key ) {
+      sub.del()
+    })
+
+    // Delete self
     if ( this.isDefined() || !this._deleted ) {
       this[ NS.value ] = undefined
       this._deleted = true
@@ -260,8 +271,8 @@ Mutant.prototype[ NS.mutate ] = function ( value, path, options ) {
   // Process options
   //
   options = options || {}
-  options.needDelta = options.needDelta || !!self.listenerCount( 'delta')
-  options.needKeys = options.needKeys || !!self.listenerCount( 'keys')
+  options.needDelta = true
+  options.needKeys = options.needKeys || !!listenerCount( self, 'keys')
 
   //
   // Set state

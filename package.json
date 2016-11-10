@@ -12,7 +12,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "lodash.map": "^4.6.0"
+    "listenercount": "^1.0.1",
+    "lodash.map": "^4.6.0",
+    "setimmediate": "^1.0.5"
   },
   "devDependencies": {
     "chai": "^3.5.0",

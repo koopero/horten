@@ -118,6 +118,28 @@ describe('Mutant', function() {
       assert.notEqual( result, init )
     })
 
+    it('will delete object', function () {
+      const init = { foo: 'bar', bar: 'baz' }
+          , mutant = new Mutant( init )
+
+      mutant.del()
+      const result = mutant.get()
+      assert.equal( result, undefined )
+    })
+
+    it('will delete objects with dirty submutants', function () {
+      const init = { foo: 'bar', bar: 'baz' }
+          , mutant = new Mutant( init )
+
+      // Walk will ensure subs are created
+      mutant.walk('foo').patch( 3 )
+      mutant.walk('bar')
+
+      mutant.del()
+      assert.equal( mutant.get(), undefined )
+      mutant.walk('foo').patch( 2 )
+      assert.deepEqual( mutant.get(), { foo: 2 } )
+    })
   })
 
   describe('.patch', function() {
@@ -347,10 +369,11 @@ describe('Mutant', function() {
       assert.deepEqual( result, { foo: { bar: 456, baz: 42 } } )
     })
 
-    xit('will set inner key 2 ', function () {
+    it('will set inner key 2 ', function () {
       const mutant = new Mutant( { foo: { bar: 123, baz: 42 } } )
       mutant.walk('foo').map( function ( sub, key ) {
         if ( key == 'bar' )
+          // sub.set( 456 )
           return 456
       })
       const result = mutant.get()

@@ -29,7 +29,9 @@ const keys = [
   'initial',
   'subs',
   'key',
-  'emit'
+  'emit',
+  'delayMax',
+  'firstTrigger'
 ]
 
 keys.forEach( ( key ) =>
