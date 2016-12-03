@@ -1,23 +1,23 @@
 'use strict'
 
-const test = require('./_test')
+var test = require('./_test')
     , assert = test.assert
     , assertPathEqual = test.assertPathEqual
 
-const Mutant = require('../src/Mutant')
+var Mutant = require('../src/Mutant')
     , eachKey = require('../src/eachKey')
     , wrap = require('../src/wrap')
 
 describe('Cursor', () => {
-  const Cursor = require('../src/Cursor')
+  var Cursor = require('../src/Cursor')
 
   describe('constructor', () => {
     it('will not smork', () => {
-      const cursor = new Cursor()
+      var cursor = new Cursor()
     })
 
     it('will init options', () => {
-      const root = new Mutant()
+      var root = new Mutant()
           , options = {
             root: root
           }
@@ -32,7 +32,7 @@ describe('Cursor', () => {
 
 
   it('will attach to root ', () => {
-    const root = new Mutant()
+    var root = new Mutant()
         , cursor = new Cursor()
 
     cursor.root = root
@@ -41,7 +41,7 @@ describe('Cursor', () => {
   })
 
   it('will set path', () => {
-    const root = new Mutant()
+    var root = new Mutant()
         , cursor = new Cursor()
 
     cursor.root = root
@@ -52,7 +52,7 @@ describe('Cursor', () => {
 
 
   it('will get the value at a path', () => {
-    const root = new Mutant( { foo: { bar: 'baz'}})
+    var root = new Mutant( { foo: { bar: 'baz'}})
         , cursor = new Cursor()
 
     cursor.root = root
@@ -62,7 +62,7 @@ describe('Cursor', () => {
   })
 
   it('will set the value at a path', () => {
-    const root = new Mutant( )
+    var root = new Mutant( )
         , ref = { sparky: true }
         , cursor = new Cursor()
 
@@ -75,7 +75,7 @@ describe('Cursor', () => {
   })
 
   it('will send events without delay', () => {
-    const root = new Mutant( )
+    var root = new Mutant( )
         , cursor = new Cursor()
 
     var calls = 0
@@ -92,7 +92,7 @@ describe('Cursor', () => {
   })
 
   it('will delay events', ( cb ) => {
-    const root = new Mutant( )
+    var root = new Mutant( )
         , cursor = new Cursor()
 
     var calls = 0
@@ -122,7 +122,7 @@ describe('Cursor', () => {
   })
 
   it('will accumulate deltas', ( cb ) => {
-    const root = new Mutant( { foo: 'bar' } )
+    var root = new Mutant( { foo: 'bar' } )
         , cursor = new Cursor()
         , time = 30
 
@@ -153,7 +153,7 @@ describe('Cursor', () => {
   })
 
   it('will receive delta from subMutant', ( cb ) => {
-    const root = new Mutant()
+    var root = new Mutant()
         , sub = root.walk('foo')
         , cursor = new Cursor()
 
@@ -170,7 +170,7 @@ describe('Cursor', () => {
   })
 
   it('will receive value from subMutant', ( cb ) => {
-    const root = new Mutant()
+    var root = new Mutant()
         , sub = root.walk('foo')
         , cursor = new Cursor()
 
@@ -187,7 +187,7 @@ describe('Cursor', () => {
   })
 
   it('will reject echos', () => {
-    const root = new Mutant()
+    var root = new Mutant()
         , cursor = new Cursor()
 
     cursor.mutant = root
@@ -204,7 +204,7 @@ describe('Cursor', () => {
   })
 
   it('will reject echos', () => {
-    const root = new Mutant()
+    var root = new Mutant()
         , cursor = new Cursor()
 
     cursor.mutant = root
@@ -221,7 +221,7 @@ describe('Cursor', () => {
   })
 
   it('will only send necessary delta ', () => {
-    const data = test.data()
+    var data = test.data()
         , root = new Mutant( data )
         , cursor = new Cursor()
         , path = test.path()
@@ -243,7 +243,7 @@ describe('Cursor', () => {
 
   describe('events', () => {
     it('delta from upstream mutant', ( cb ) => {
-      const root = new Mutant()
+      var root = new Mutant()
           , path = test.path()
           , child = root.walk( path )
           , data = test.data()
@@ -279,12 +279,12 @@ describe('Cursor', () => {
 
   describe('.hold', () => {
     it('will be off by default', () => {
-      const cursor = new Cursor()
+      var cursor = new Cursor()
       assert.equal( cursor.hold, false )
     })
 
     it('will always be boolean', () => {
-      const cursor = new Cursor({
+      var cursor = new Cursor({
         hold: 'yes'
       })
       assert.equal( cursor.hold, true )
@@ -300,7 +300,7 @@ describe('Cursor', () => {
     })
 
     it('will hold events until release', () => {
-      const root = new Mutant()
+      var root = new Mutant()
           , cursor = new Cursor()
           , data = { foo: 'bar' }
 

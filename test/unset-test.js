@@ -1,10 +1,10 @@
-const test = require('./_test')
+var test = require('./_test')
     , assert = test.assert
 
 describe('unset', function () {
-  const unset = require('../src/unset')
+  var unset = require('../src/unset')
   it('it will not smoke', function () {
-    const mod = require('../index')
+    var mod = require('../index')
     assert.isFunction( unset )
     assert.isFunction( mod.unset )
   })
@@ -14,7 +14,7 @@ describe('unset', function () {
   })
 
   it('will unset a key', function() {
-    const data = { foo: 'bar', bar: 'baz' }
+    var data = { foo: 'bar', bar: 'baz' }
         , result = unset( data, [['foo']] )
 
     assert.deepEqual( result, { bar: 'baz' } )
@@ -22,7 +22,7 @@ describe('unset', function () {
   })
 
   it('will pass object unchanged when path does not exist', function () {
-    const data = { foo: 'bar' }
+    var data = { foo: 'bar' }
         , result = unset( data, 'baz/' )
 
     assert.deepEqual( result, { foo: 'bar' } )

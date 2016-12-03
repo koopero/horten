@@ -1,22 +1,22 @@
-const test = require('./_test')
+var test = require('./_test')
     , assert = test.assert
 
 describe('eachPath', function () {
-  const eachPath = require('../src/eachPath')
+  var eachPath = require('../src/eachPath')
   it('will do nothing', function () {
     eachPath()
     eachPath( { foo: 'bar' } )
   })
 
   it('will return paths', function () {
-    const data = { foo: { bar: 42 } }
+    var data = { foo: { bar: 42 } }
         , result = eachPath( data )
 
     assert.deepEqual( result, [['foo','bar']] )
   })
 
   it('will call callback', function () {
-    const data = { foo: { bar: 42 } }
+    var data = { foo: { bar: 42 } }
 
     var calls = 0
 
@@ -30,7 +30,7 @@ describe('eachPath', function () {
   })
 
   it('will call callback once for primitives', function () {
-    const data = 42
+    var data = 42
 
     var calls = 0
 

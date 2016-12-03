@@ -1,11 +1,13 @@
-const path = exports
+'use strict'
 
-const isString = ( val ) => 'string' == typeof val
+var path = exports
+
+var isString = ( val ) => 'string' == typeof val
     , isArrayLike = ( val ) => ( 'object' == typeof val ) && ( 'number' == typeof val.length )
 
-const SEP = '/'
+var SEP = '/'
 
-const SPLIT_RESULT = Symbol('SPLIT_RESULT')
+var SPLIT_RESULT = Symbol('SPLIT_RESULT')
 
 path.sep = SEP
 
@@ -28,7 +30,7 @@ path.blank = function () {
 }
 
 path.last = function () {
-  const p = path.split( arguments )
+  var p = path.split( arguments )
   if ( p.length )
     return p[ p.length - 1 ]
 }
@@ -73,10 +75,11 @@ path.split = function () {
   // Do the actual work
   //
 
-  const result = []
+  var result = []
   array( arguments )
-  Object.freeze( result )
   result[ SPLIT_RESULT ] = true
+
+  Object.freeze( result )
 
   return result
 

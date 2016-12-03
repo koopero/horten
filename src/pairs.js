@@ -1,12 +1,14 @@
+'use strict'
+
 module.exports = pairs
 
-const SEP = require('./path').sep
+var SEP = require('./path').sep
     , pathJoin = require('./pathJoin')
     , hasKeys = require('./hasKeys')
     , eachKey = require('./eachKey')
 
 function pairs ( object ) {
-  const result = []
+  var result = []
   walk( object, SEP )
   return result
 

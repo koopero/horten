@@ -1,4 +1,6 @@
-const path = require('./path')
+'use strict'
+
+var path = require('./path')
     , split = path.split
     , eachKey = require('./eachKey')
     , hasKeys = require('./hasKeys')

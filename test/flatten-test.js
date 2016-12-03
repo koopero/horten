@@ -1,25 +1,25 @@
-const assert = require('chai').assert
+var assert = require('chai').assert
 describe('flatten', function () {
-  const flatten = require('../src/flatten')
+  var flatten = require('../src/flatten')
   it('works', function () {
-    const source = {
+    var source = {
       foo: {
         bar: 4
       },
       bar: 3
 
     }
-    const expected = {
+    var expected = {
       'foo/bar/': 4,
       'bar/':3,
     }
 
-    const result = flatten( source )
+    var result = flatten( source )
     assert.deepEqual( result, expected )
   })
 
   it('detects circular data', function () {
-    const source = {
+    var source = {
       foo: {
         bar: 4
       },

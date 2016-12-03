@@ -28,7 +28,7 @@ const split = require('./path').split
 class Cursor extends EventEmitter {
   constructor ( config ) {
     super()
-    const self = this
+    var self = this
 
     this[ NS.held ] = {}
 
@@ -57,14 +57,14 @@ class Cursor extends EventEmitter {
 
     const self = this
         , keys = [
-      'delay',
-      'hold',
-      'root',
-      'path',
-      'mutant',
-      'listening',
-      'delayMax'
-    ]
+            'delay',
+            'hold',
+            'root',
+            'path',
+            'mutant',
+            'listening',
+            'delayMax'
+          ]
 
     keys.forEach( ( key ) => {
       if ( 'undefined' !== typeof config[key] )
@@ -72,7 +72,7 @@ class Cursor extends EventEmitter {
     } )
 
     EVENT_NAMES.forEach( ( eventName ) => {
-      const listenerName = 'on' + eventName.slice( 0, 1 ).toUpperCase() + eventName.slice( 1 )
+      var listenerName = 'on' + eventName.slice( 0, 1 ).toUpperCase() + eventName.slice( 1 )
       if ( config[listenerName] )
         self.on( eventName, config[listenerName] )
     })
@@ -106,7 +106,7 @@ class Cursor extends EventEmitter {
   }
 
   set mutant( newMutant ) {
-    var mutant = this[ NS.mutant ]
+    const mutant = this[ NS.mutant ]
 
     if ( !Mutant.isMutant( newMutant ) ) {
       throw new Error("Mutant imposter!")
@@ -170,7 +170,10 @@ class Cursor extends EventEmitter {
 
   set hold( value ) {
     value = !!value
-    const oldValue = this[ NS.hold ]
+
+    // console.log('Cursor.set hold', value )
+
+    var oldValue = this[ NS.hold ]
     this[ NS.hold ] = value
 
     if ( !value && oldValue ) {
@@ -198,7 +201,7 @@ class Cursor extends EventEmitter {
   }
 
   trigger( forceDelay ) {
-    const self = this
+    var self = this
         , delay = self[ NS.delayTime ]
         , time = now()
 
@@ -206,11 +209,11 @@ class Cursor extends EventEmitter {
       return false
 
     self[ NS.clearTimers ]()
-    const release = self.release.bind( self )
+    var release = self.release.bind( self )
 
     self[ NS.firstTrigger ] = self[ NS.firstTrigger ] || time
 
-    const triggerAge = time - self[ NS.firstTrigger ]
+    var triggerAge = time - self[ NS.firstTrigger ]
 
     if ( self.delayMax && self.delayMax < triggerAge ) {
       release()
@@ -224,7 +227,7 @@ class Cursor extends EventEmitter {
   }
 
   release() {
-    const self = this
+    var self = this
         , held = self[ NS.held ]
 
     if ( self[ NS.releasing ] )
@@ -234,11 +237,14 @@ class Cursor extends EventEmitter {
 
     var delta = this[ NS.delta ].get()
 
-    self[ NS.delta ].del()
+    // self[ NS.delta ].del()
+    self[ NS.delta ] = new Mutant()
     self[ NS.held ] = {}
     self[ NS.clearTimers ]()
     self[ NS.releaseTime ] = now()
     self[ NS.releasing ] = true
+
+    // console.log('Cursor.release', held, delta )
 
 
     if ( held.change )
@@ -261,7 +267,7 @@ class Cursor extends EventEmitter {
   //
   //
   patch( value ) {
-    const path = slice( arguments, 1 )
+    var path = slice( arguments, 1 )
         , mutant = this.mutant
 
     if ( this[ NS.echo ] )
@@ -271,7 +277,7 @@ class Cursor extends EventEmitter {
   }
 
   merge( value ) {
-    const path = slice( arguments, 1 )
+    var path = slice( arguments, 1 )
         , mutant = this.mutant
 
     if ( this[ NS.echo ] )
@@ -282,7 +288,7 @@ class Cursor extends EventEmitter {
 
 
   get( path ) {
-    const mutant = this.mutant
+    var mutant = this.mutant
     return mutant.get.apply( mutant, arguments )
   }
 
@@ -296,6 +302,10 @@ class Cursor extends EventEmitter {
 
   get value() {
     return this.mutant.get()
+  }
+
+  pull() {
+    this[ NS.listenerBound ]['delta']( this.value )
   }
 
 
@@ -321,6 +331,7 @@ Cursor.prototype[ NS.clearTimers ] = function() {
 Cursor.prototype[ NS.listener ] = {}
 
 Cursor.prototype[ NS.listener ].delta = function ( delta ) {
+  // console.log('Cursor delta listener', delta )
   this[ NS.delta ].patch( delta )
   this[ NS.held ].change = true
   this[ NS.held ].value  = true

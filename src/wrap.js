@@ -1,9 +1,9 @@
 'use strict'
 
-const path = require('./path')
+var path = require('./path')
 
 module.exports = function wrap( value ) {
-  const segs = path.slice( arguments, 1 )
+  var segs = path.slice( arguments, 1 )
   for ( var i = segs.length - 1; i >= 0; i -- ) {
     let seg = segs[i]
       , tmp = {}

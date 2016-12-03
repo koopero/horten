@@ -1,13 +1,13 @@
-const test = require('./_test')
+var test = require('./_test')
     , assert = test.assert
 
 describe('Echo', function () {
-  const Echo = require('../src/Echo')
+  var Echo = require('../src/Echo')
   it("doesn't smoke", function () {
-    const _module = require('../index')
+    var _module = require('../index')
     assert.isFunction( _module.Echo )
     assert.isFunction( Echo )
-    const echo = Echo()
+    var echo = Echo()
 
     assert.instanceOf( echo, Echo )
     assert.isFunction( echo.send )
@@ -15,7 +15,7 @@ describe('Echo', function () {
   })
 
   it('will work', function () {
-    const echo = Echo()
+    var echo = Echo()
     var data = { foo: 'bar' }
     echo.send( data )
 
@@ -26,7 +26,7 @@ describe('Echo', function () {
 
   describe('receive', function () {
     it('will pass data unmolested', function () {
-      const echo = Echo()
+      var echo = Echo()
       var data = { foo: 'bar' }
       var result = echo.receive( data )
 

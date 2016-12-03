@@ -9,6 +9,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
+  },
+  "browser": "index.js",
+  "browserify": {
+    "transform": [["babelify", { "presets": ["es2015"] }]]
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -17,6 +26,7 @@
     "setimmediate": "^1.0.5"
   },
   "devDependencies": {
+    "babel-preset-es2015": "^6.18.0",
     "chai": "^3.5.0",
     "mocha": "^3.1.0",
     "mocha-istanbul": "^0.3.0"

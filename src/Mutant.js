@@ -1,7 +1,7 @@
 'use strict'
 module.exports = MutantFactory
 
-const NS = require('./namespace')
+var NS = require('./namespace')
     , pathlib = require('./path')
     , simple = pathlib.simple
     , resolve = pathlib.resolve
@@ -16,18 +16,19 @@ const NS = require('./namespace')
     , isDefined = ( val ) => 'undefined' != typeof val
     , isArray = val => {Array.isArray( val )}
 
-const EMIT = Symbol('EMIT')
+var EMIT = Symbol('EMIT')
     , _patchingSub = Symbol()
 
-const listenerCount = require('listenercount')
+var listenerCount = require('listenercount')
 
 class Mutant extends EventEmitter {
   constructor ( initial ) {
     super()
     this[ NS.isMutant ] = true
-    const self = this
+    var self = this
     this[ NS.initial ] = initial
     this[ NS.value ] = initial
+    this.patch( initial )
     // console.log('new', this[ NS.value ] )
   }
 
@@ -47,7 +48,8 @@ class Mutant extends EventEmitter {
   }
 
   get root() {
-    return this[ NS.root ] = this[ NS.root ] || this
+    this[ NS.root ] = this[ NS.root ] || this
+    return this[ NS.root ]
   }
 
   get key() {
@@ -69,7 +71,7 @@ MutantFactory.isMutant = Mutant.isMutant = ( val ) =>
 
 
 Mutant.prototype.result = function () {
-  const self = this
+  var self = this
       , subResults = {}
 
   var value = this.value
@@ -81,7 +83,7 @@ Mutant.prototype.result = function () {
       if ( !sub.isDirty() )
         return
 
-      const subResult = sub.result()
+      var subResult = sub.result()
       if ( 'undefined' != typeof subResult ) {
 
         if ( !isClone || !hasKeys( self[ NS.value ] ) ) {
@@ -146,8 +148,11 @@ Mutant.prototype.subMutant = function ( key ) {
 
   var sub = this[ NS.subs ][key]
 
+  // if ( 'undefined' == typeof initial )
+  var initial = hasKeys( this[ NS.value ] ) ? this[ NS.value ][key] : undefined
+
   if ( !sub ) {
-    sub = new Mutant( hasKeys( this[ NS.value ] ) ? this[ NS.value ][key] : undefined )
+    sub = new Mutant( initial )
     sub[ NS.key ] = key
     sub[ NS.path ] = split( this.path, key )
     sub[ NS.root ] = this.root
@@ -158,11 +163,11 @@ Mutant.prototype.subMutant = function ( key ) {
 }
 
 Mutant.prototype.get = function () {
-  const path = split( arguments )
+  var path = split( arguments )
   if ( blank( path ) ) {
     return this.result()
   } else {
-    const key = path[0]
+    var key = path[0]
         , sub = this.subMutant( key )
 
     return sub.get( path.slice( 1 ) )
@@ -188,7 +193,7 @@ Mutant.prototype.set = function ( value, path ) {
 
 Mutant.prototype.map = function ( callback ) {
   callback = callback || function() {}
-  const self = this
+  var self = this
       , data = this.get()
   if ( hasKeys( data ) ) {
     eachKey( data, function ( value, key ) {
@@ -207,11 +212,11 @@ Mutant.prototype.map = function ( callback ) {
 }
 
 Mutant.prototype.walk = function () {
-  const path = split( arguments )
+  var path = split( arguments )
   if ( blank( path ) ) {
     return this
   } else {
-    const key = path[0]
+    var key = path[0]
     return this.subMutant( key ).walk( path.slice( 1 ) )
   }
 }
@@ -225,7 +230,7 @@ Mutant.prototype.isDefined = function () {
 }
 
 Mutant.prototype.del = function () {
-  const path = split( arguments )
+  var path = split( arguments )
   if ( blank( path ) ) {
     // Delete subs
     eachKey( this[ NS.subs ], function ( sub, key ) {
@@ -241,7 +246,7 @@ Mutant.prototype.del = function () {
       return false
     }
   } else {
-    const key = path[0]
+    var key = path[0]
         , sub = this.subMutant( key )
     return sub.del( path.slice( 1 ) )
   }
@@ -253,7 +258,7 @@ Mutant.prototype.eachPath = function ( callback, initialPath ) {
 }
 
 Mutant.prototype.cursor = function() {
-  const Cursor = require('./Cursor')
+  var Cursor = require('./Cursor')
       , cursor = Cursor()
 
   cursor.root = this.root
@@ -264,7 +269,7 @@ Mutant.prototype.cursor = function() {
 
 
 Mutant.prototype[ NS.mutate ] = function ( value, path, options ) {
-  const self = this
+  var self = this
       , result = {}
 
   //
@@ -272,7 +277,7 @@ Mutant.prototype[ NS.mutate ] = function ( value, path, options ) {
   //
   options = options || {}
   options.needDelta = true
-  options.needKeys = options.needKeys || !!listenerCount( self, 'keys')
+  options.needKeys = options.needKeys || !!listenerCount( self, 'keys' )
 
   //
   // Set state
@@ -295,22 +300,35 @@ Mutant.prototype[ NS.mutate ] = function ( value, path, options ) {
 
       eachKey( value, function ( subVal, key ) {
 
-        const sub = self.subMutant( key )
+        var sub = self.subMutant( key, subVal )
         self[ _patchingSub ] = sub
-        const subDelta = sub.patch( subVal )
+        var subDelta = sub.patch( subVal )
         self[ _patchingSub ] = null
 
-        if ( subDelta === undefined )
-          return
-
-        result.delta = result.delta || {}
-        result.delta[key] = subDelta
+        if ( subDelta !== undefined ) {
+          result.delta = result.delta || {}
+          result.delta[key] = subDelta
+        }
       } )
+    } else if ( hasKeys( value ) ) {
+
+      eachKey( this[ NS.subs ], function ( sub, key ) {
+        var valToSub = value[key]
+        // if ( 'undefined' == typeof valToSub )
+        //   return
+
+        sub[ NS.value ] = valToSub
+      } )
+
+      this[ NS.value ] = value
+      result.delta = value
 
     } else if ( this[ NS.value ] != value ) {
       this[ NS.value ] = value
       result.delta = value
     }
+
+
 
   } else {
     var key = path[0]

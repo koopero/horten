@@ -1,4 +1,6 @@
-const map = require('lodash.map')
+'use strict'
+
+var map = require('lodash.map')
     , hasKeys = require('./hasKeys')
 
 module.exports = function ( subject, callback ) {

@@ -1,7 +1,7 @@
-const test = require('./_test')
+var test = require('./_test')
     , assert = test.assert
 describe('isEmpty', () => {
-  const isEmpty = require('../src/isEmpty')
+  var isEmpty = require('../src/isEmpty')
       , test = ( value, empty ) =>
         it( JSON.stringify( value )+' => '+JSON.stringify( empty ), () => assert.equal( isEmpty( value ), empty ) )
 

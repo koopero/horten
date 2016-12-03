@@ -1,9 +1,9 @@
-const assert = require('chai').assert
+var assert = require('chai').assert
 
 describe('pairs', function () {
-  const pairs = require('../src/pairs')
+  var pairs = require('../src/pairs')
   it('will work', function () {
-    const ob = {
+    var ob = {
         foo: {
           bar: 'baz'
         }
@@ -14,7 +14,7 @@ describe('pairs', function () {
   })
 
   it('arrays', function () {
-    const ob = ['foo']
+    var ob = ['foo']
         , res = [ ['0/', 'foo'] ]
 
     assert.deepEqual( pairs(ob), res )

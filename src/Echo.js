@@ -1,9 +1,11 @@
+'use strict'
+
 module.exports = Echo
 
-const Mutant = require('./Mutant')
+var Mutant = require('./Mutant')
 
 function Echo() {
-  const self = Object.create( Echo.prototype )
+  var self = Object.create( Echo.prototype )
       , echo = new Mutant( {} )
 
   self.send = function( data ) {
@@ -17,7 +19,7 @@ function Echo() {
     data = new Mutant( data )
 
     echo.eachPath( function ( value, path ) {
-      const echoValue = echo.get( path )
+      var echoValue = echo.get( path )
 
       if ( value == echoValue )
         data.del( path )

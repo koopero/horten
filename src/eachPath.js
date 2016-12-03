@@ -1,9 +1,11 @@
-const split = require('./path').split
+'use strict'
+
+var split = require('./path').split
     , hasKeys = require('./hasKeys')
     , eachKey = require('./eachKey')
 
 module.exports = function eachPath( subject, callback, initialPath ) {
-  const result = []
+  var result = []
   walk( subject, split( initialPath ) )
   return result
 
