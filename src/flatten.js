@@ -1,3 +1,5 @@
+'use strict'
+
 const path = require('./path')
     , resolve = path.resolve
     , hasKeys = require('./hasKeys')

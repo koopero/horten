@@ -1,4 +1,4 @@
-const test = exports
+var test = exports
     , assert = require('chai').assert
     , path = require('../src/path')
 
@@ -10,7 +10,7 @@ test.wrapEqual = function( func ) {
     desc = desc || ( JSON.stringify( args )+' === '+JSON.stringify( expect ) )
 
     it( desc, function () {
-      const result = func.apply( null, args )
+      var result = func.apply( null, args )
       test.assert.equal( result, expect )
     })
 
@@ -23,7 +23,7 @@ test.wrapEquiv = function( func ) {
     desc = desc || ( JSON.stringify( args )+' == '+JSON.stringify( expect ) )
 
     it( desc, function () {
-      const result = func.apply( null, args )
+      var result = func.apply( null, args )
       test.assert.deepEqual( result, expect )
     })
 
@@ -39,10 +39,10 @@ test.number = () =>
   Math.round( Math.random() * 4 ) * Math.pow( 2, Math.round( Math.random() * 8 - 3 ) )
 
 
-const DATA_KEYS = ['echelon','cadillac','funfur','stakeout','vulcan','verbiage']
+var DATA_KEYS = ['echelon','cadillac','funfur','stakeout','vulcan','verbiage']
 
 test.data = function() {
-  const result = {}
+  var result = {}
   for ( var i = 0; i < 3; i ++ ) {
     var ind = Math.floor( DATA_KEYS.length * Math.random() )
       , key = DATA_KEYS[ind]
@@ -53,7 +53,7 @@ test.data = function() {
   return result
 }
 
-const PATH_KEYS = ['computron','oscillator','ostrich','oven','other']
+var PATH_KEYS = ['computron','oscillator','ostrich','oven','other']
 
 test.path = function() {
   var result = []

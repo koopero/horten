@@ -57,14 +57,14 @@ class Cursor extends EventEmitter {
 
     const self = this
         , keys = [
-      'delay',
-      'hold',
-      'root',
-      'path',
-      'mutant',
-      'listening',
-      'delayMax'
-    ]
+            'delay',
+            'hold',
+            'root',
+            'path',
+            'mutant',
+            'listening',
+            'delayMax'
+          ]
 
     keys.forEach( ( key ) => {
       if ( 'undefined' !== typeof config[key] )
@@ -106,7 +106,7 @@ class Cursor extends EventEmitter {
   }
 
   set mutant( newMutant ) {
-    var mutant = this[ NS.mutant ]
+    const mutant = this[ NS.mutant ]
 
     if ( !Mutant.isMutant( newMutant ) ) {
       throw new Error("Mutant imposter!")
@@ -114,7 +114,7 @@ class Cursor extends EventEmitter {
     }
 
     if ( newMutant != mutant ) {
-      var wasListening = this.listening
+      const wasListening = this.listening
       this.listening = false
       this[ NS.mutant ] = newMutant
       this.listening = wasListening
@@ -170,6 +170,9 @@ class Cursor extends EventEmitter {
 
   set hold( value ) {
     value = !!value
+
+    // console.log('Cursor.set hold', value )
+
     const oldValue = this[ NS.hold ]
     this[ NS.hold ] = value
 
@@ -234,11 +237,14 @@ class Cursor extends EventEmitter {
 
     var delta = this[ NS.delta ].get()
 
-    self[ NS.delta ].del()
+    // self[ NS.delta ].del()
+    self[ NS.delta ] = new Mutant()
     self[ NS.held ] = {}
     self[ NS.clearTimers ]()
     self[ NS.releaseTime ] = now()
     self[ NS.releasing ] = true
+
+    // console.log('Cursor.release', held, delta )
 
 
     if ( held.change )
@@ -298,6 +304,10 @@ class Cursor extends EventEmitter {
     return this.mutant.get()
   }
 
+  pull() {
+    this[ NS.listenerBound ]['delta']( this.value )
+  }
+
 
 }
 
@@ -321,6 +331,7 @@ Cursor.prototype[ NS.clearTimers ] = function() {
 Cursor.prototype[ NS.listener ] = {}
 
 Cursor.prototype[ NS.listener ].delta = function ( delta ) {
+  // console.log('Cursor delta listener', delta )
   this[ NS.delta ].patch( delta )
   this[ NS.held ].change = true
   this[ NS.held ].value  = true

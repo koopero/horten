@@ -1,11 +1,12 @@
+'use strict'
+
 const path = exports
 
 const isString = ( val ) => 'string' == typeof val
     , isArrayLike = ( val ) => ( 'object' == typeof val ) && ( 'number' == typeof val.length )
 
-const SEP = '/'
-
-const SPLIT_RESULT = Symbol('SPLIT_RESULT')
+const NS = require('./namespace')
+    , SEP = NS.SEP
 
 path.sep = SEP
 
@@ -28,7 +29,7 @@ path.blank = function () {
 }
 
 path.last = function () {
-  const p = path.split( arguments )
+  var p = path.split( arguments )
   if ( p.length )
     return p[ p.length - 1 ]
 }
@@ -65,7 +66,7 @@ path.split = function () {
   //
   if ( arguments.length == 1
     && Array.isArray( arguments[0] )
-    && arguments[0][SPLIT_RESULT]
+    && arguments[0][ NS.splitResult ]
   )
     return arguments[0]
 
@@ -73,10 +74,11 @@ path.split = function () {
   // Do the actual work
   //
 
-  const result = []
+  var result = []
   array( arguments )
+  result[  NS.splitResult  ] = true
+
   Object.freeze( result )
-  result[ SPLIT_RESULT ] = true
 
   return result
 

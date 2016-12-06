@@ -1,7 +1,6 @@
 const H = exports
 
 H.NS = require('./src/namespace')
-H.root = require('./src/root')
 H.path = require('./src/path')
 H.compose = require('./src/compose')
 H.pairs = require('./src/pairs')
@@ -11,13 +10,11 @@ H.unset = require('./src/unset')
 H.Echo = require('./src/Echo')
 H.Mutant = require('./src/Mutant')
 H.Cursor = require('./src/Cursor')
-
+H.root = require('./src/root')
 
 Object.freeze( H )
-
 
 //
 // Add global.
 //
-
 global.H = H

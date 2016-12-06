@@ -14,8 +14,6 @@ describe('Mutant::mutate', function() {
 
       const result = mutant[ mutate ]( data, [], { needDelta: true } )
 
-      console.log( 'result', result )
-
       assert( result )
       assert( result.delta )
       assert.deepEqual( result.delta, data )

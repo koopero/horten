@@ -16,10 +16,10 @@ describe('Echo', function () {
 
   it('will work', function () {
     const echo = Echo()
-    var data = { foo: 'bar' }
+    const data = { foo: 'bar' }
     echo.send( data )
 
-    var result = echo.receive( data )
+    const result = echo.receive( data )
 
     assert.deepEqual( {}, result )
   })
@@ -27,8 +27,8 @@ describe('Echo', function () {
   describe('receive', function () {
     it('will pass data unmolested', function () {
       const echo = Echo()
-      var data = { foo: 'bar' }
-      var result = echo.receive( data )
+      const data = { foo: 'bar' }
+      const result = echo.receive( data )
 
       assert.equal( result, data )
     })

@@ -1,3 +1,5 @@
+'use strict'
+
 /*
   Utility to detect circularity when traversing objects.
 */

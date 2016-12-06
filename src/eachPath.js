@@ -1,3 +1,5 @@
+'use strict'
+
 const split = require('./path').split
     , hasKeys = require('./hasKeys')
     , eachKey = require('./eachKey')

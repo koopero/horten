@@ -11,7 +11,7 @@ Sorry about that.
 
 ### Example
 ``` js
-const value = {
+var value = {
   foo: {
     bar: {
       baz: 42
@@ -19,7 +19,7 @@ const value = {
   }
 }
 
-const result = H.get( value, 'foo/bar/baz/' )
+var result = H.get( value, 'foo/bar/baz/' )
 
 assert.equal( result, 42 )
 ```
@@ -34,7 +34,7 @@ is delimited by `'/'` with a trailing slash. Deal with it.
 maintaining immutability of inputs and outputs. For example:
 
 ``` js
-  const value = { foo: 'bar', baz: 'bop' }
+  var value = { foo: 'bar', baz: 'bop' }
       , mutant = H.Mutant( value )
 
   mutant.set( 42, 'foo' )

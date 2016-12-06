@@ -28,7 +28,4 @@ describe('unset', function () {
     assert.deepEqual( result, { foo: 'bar' } )
     assert.equal( result, data )
   })
-
-
-
 })

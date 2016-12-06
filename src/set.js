@@ -1,3 +1,5 @@
+'use strict'
+
 module.exports = set
 
 const slice = require('./path').slice

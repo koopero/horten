@@ -1,3 +1,5 @@
+'use strict'
+
 const map = require('lodash.map')
     , hasKeys = require('./hasKeys')
 

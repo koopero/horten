@@ -1,3 +1,5 @@
+'use strict'
+
 module.exports = Echo
 
 const Mutant = require('./Mutant')
@@ -25,7 +27,7 @@ function Echo() {
       echo.del( path )
     })
 
-    var delta = data.get()
+    const delta = data.get()
     return delta
   }
 

@@ -1,37 +1,44 @@
+'use strict'
+
 const NS = ( global.H && global.H.NS ) || exports
 module.exports = NS
 
+NS.SEP = '/'
+
 const keys = [
+  'clearTimers',
+  'delay',
+  'delayMax',
+  'delayTime',
+  'delta',
+  'dirty',
+  'echo',
+  'emit',
+  'firstTrigger',
+  'hold',
+  'held',
+  'immediate',
+  'initial',
   'isMutant',
+  'key',
+  'listener',
+  'listening',
+  'listenerBound',
+  'mutant',
   'mutate',
   'mutating',
   'mutation',
-  'listener',
-  'listenerBound',
-  'sender',
-  'immediate',
-  'timeout',
-  'root',
-  'echo',
-  'path',
-  'delay',
-  'delayTime',
-  'delta',
-  'mutant',
-  'listening',
-  'clearTimers',
-  'hold',
-  'held',
-  'releasing',
   'onSubMutate',
   'parent',
-  'value',
-  'initial',
+  'path',
+  'releaseTime',
+  'releasing',
+  'root',
+  'sender',
+  'splitResult',
   'subs',
-  'key',
-  'emit',
-  'delayMax',
-  'firstTrigger'
+  'timeout',
+  'value',
 ]
 
 keys.forEach( ( key ) =>

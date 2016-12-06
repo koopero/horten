@@ -1,3 +1,5 @@
+'use strict'
+
 const Mutant = require('./Mutant')
     , globalKey = '__horten_root'
 

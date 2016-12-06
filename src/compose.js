@@ -1,3 +1,5 @@
+'use strict'
+
 const Mutant = require('./Mutant')
     , normalize = require('./normalize')
     , eachKey = require('./eachKey')
