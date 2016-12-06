@@ -1,9 +1,11 @@
 'use strict'
 
-var NS = ( global.H && global.H.NS ) || exports
+const NS = ( global.H && global.H.NS ) || exports
 module.exports = NS
 
-var keys = [
+NS.SEP = '/'
+
+const keys = [
   'clearTimers',
   'delay',
   'delayMax',
@@ -33,6 +35,7 @@ var keys = [
   'releasing',
   'root',
   'sender',
+  'splitResult',
   'subs',
   'timeout',
   'value',

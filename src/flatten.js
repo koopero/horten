@@ -1,6 +1,6 @@
 'use strict'
 
-var path = require('./path')
+const path = require('./path')
     , resolve = path.resolve
     , hasKeys = require('./hasKeys')
     , eachKey = require('./eachKey')
@@ -8,8 +8,8 @@ var path = require('./path')
 
 module.exports = function flatten ( object ) {
 
-  var result = {}
-  var circ = circular()
+  const result = {}
+  const circ = circular()
   walk( object, '/' )
   return result
 

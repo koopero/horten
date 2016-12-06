@@ -1,11 +1,11 @@
-var test = require('./_test')
+const test = require('./_test')
     , assert = test.assert
 
 
 describe('normalize', function () {
-  var normalize = require('../src/normalize')
+  const normalize = require('../src/normalize')
 
-  var testEqual = test.wrapEqual( normalize )
+  const testEqual = test.wrapEqual( normalize )
       , testEquiv = test.wrapEquiv( normalize )
 
   testEqual( [4], 4 )
@@ -55,57 +55,57 @@ describe('normalize', function () {
   })
 
   it('does inner paths', function () {
-    var source = {
+    const source = {
       'bar': {
         'bean/bonk/': 5
       },
     }
-    var expected = {
+    const expected = {
       bar: { bean: { bonk: 5 }}
     }
 
-    var result = normalize( source )
+    const result = normalize( source )
     assert.deepEqual( result, expected )
   })
 
   it('similar paths', function () {
-    var source = {
+    const source = {
       'bar/bonk/baz': 6,
       '/bar/bonk/foo/': 5
     }
-    var expected = {
+    const expected = {
       bar: { bonk: { baz: 6, foo: 5 } }
     }
 
-    var result = normalize( source )
+    const result = normalize( source )
     assert.deepEqual( result, expected )
   })
 
   it('path within paths', function () {
-    var source = {
+    const source = {
       foo: {
         '/bar/': 5
       }
     }
-    var expected = {
+    const expected = {
       foo: { bar: 5 }
     }
 
-    var result = normalize( source )
+    const result = normalize( source )
     assert.deepEqual( result, expected )
   })
 
   it('passes simple values unaltered', function () {
-    var source = {
+    const source = {
       foo: {
         '/bar/': 5
       }
     }
-    var expected = {
+    const expected = {
       foo: { bar: 5 }
     }
 
-    var result = normalize( source )
+    const result = normalize( source )
     assert.deepEqual( result, expected )
   })
 

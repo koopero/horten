@@ -2,13 +2,13 @@
 
 module.exports = pairs
 
-var SEP = require('./path').sep
+const SEP = require('./path').sep
     , pathJoin = require('./pathJoin')
     , hasKeys = require('./hasKeys')
     , eachKey = require('./eachKey')
 
 function pairs ( object ) {
-  var result = []
+  const result = []
   walk( object, SEP )
   return result
 

@@ -1,8 +1,7 @@
-
-var assert = require('chai').assert
+const assert = require('chai').assert
 
 describe('wrap', () => {
-  var wrap = require('../src/wrap')
+  const wrap = require('../src/wrap')
 
   it('no path', () => {
     assert.deepEqual( wrap( 'bar'), 'bar')

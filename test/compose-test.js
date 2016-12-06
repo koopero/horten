@@ -1,56 +1,56 @@
-var assert = require('chai').assert
+const assert = require('chai').assert
 describe('compose', function () {
-  var compose = require('../src/compose')
+  const compose = require('../src/compose')
   it('works', function () {
-    var source = {
+    const source = {
       '/foo/bar/': 4,
       'bar':3,
     }
-    var expected = {
+    const expected = {
       foo: {
         bar: 4
       },
       bar: 3
     }
 
-    var result = compose( source )
+    const result = compose( source )
     assert.deepEqual( result, expected )
   })
 
   it('does inner paths', function () {
-    var source = {
+    const source = {
       'bar': {
         'bean/bonk/': 5
       },
     }
-    var expected = {
+    const expected = {
       bar: { bean: { bonk: 5 }}
     }
 
-    var result = compose( source )
+    const result = compose( source )
     assert.deepEqual( result, expected )
   })
 
   it('similar paths', function () {
-    var source = {
+    const source = {
       'bar/bonk/baz': 6,
       '/bar/bonk/foo/': 5
     }
-    var expected = {
+    const expected = {
       bar: { bonk: { baz: 6, foo: 5 } }
     }
 
-    var result = compose( source )
+    const result = compose( source )
     assert.deepEqual( result, expected )
   })
 
   it('merge multiple arguments', function () {
-    var result = compose(
+    const result = compose(
       { '/bar/baz': 4 },
       null,
       { 'bar/foo/': 5 }
     )
-    var expected = {
+    const expected = {
       bar: { baz: 4, foo: 5}
     }
     assert.deepEqual( result, expected )

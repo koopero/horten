@@ -1,6 +1,6 @@
 'use strict'
 
-var Mutant = require('./Mutant')
+const Mutant = require('./Mutant')
     , normalize = require('./normalize')
     , eachKey = require('./eachKey')
     , isUndefined = ( val ) => 'undefined' == typeof val

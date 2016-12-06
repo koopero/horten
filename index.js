@@ -1,4 +1,4 @@
-var H = exports
+const H = exports
 
 H.NS = require('./src/namespace')
 H.path = require('./src/path')
@@ -14,9 +14,7 @@ H.root = require('./src/root')
 
 Object.freeze( H )
 
-
 //
 // Add global.
 //
-
 global.H = H

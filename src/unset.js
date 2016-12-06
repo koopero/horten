@@ -2,11 +2,11 @@
 
 module.exports = unset
 
-var slice = require('./path').slice
+const slice = require('./path').slice
     , Mutant = require('./Mutant')
 
 function unset( data ) {
-  var path = slice( arguments, 1 )
+  const path = slice( arguments, 1 )
       , mutant = Mutant( data )
 
   mutant.del( path )

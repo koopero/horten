@@ -1,13 +1,13 @@
-var test = require('./_test')
+const test = require('./_test')
     , assert = test.assert
     , assertPathEqual = test.assertPathEqual
 
 describe('Mutant events', function() {
-  var Mutant = require('../src/Mutant')
+  const Mutant = require('../src/Mutant')
 
   describe('change', function () {
     it('is called on change', function () {
-      var mutant = Mutant()
+      const mutant = Mutant()
           , data = 42
 
       var calls = 0
@@ -24,7 +24,7 @@ describe('Mutant events', function() {
 
   describe('value', function () {
     it('is called on change', function () {
-      var mutant = Mutant()
+      const mutant = Mutant()
           , data = 42
 
       var calls = 0
@@ -41,7 +41,7 @@ describe('Mutant events', function() {
 
     describe('submutants', function () {
       it('is called on change', function () {
-        var mutant = Mutant()
+        const mutant = Mutant()
             , data = 42
             , path = 'foo/bar'
 

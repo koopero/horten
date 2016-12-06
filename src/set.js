@@ -2,11 +2,11 @@
 
 module.exports = set
 
-var slice = require('./path').slice
+const slice = require('./path').slice
     , Mutant = require('./Mutant')
 
 function set( subject, value ) {
-  var path = slice( arguments, 2 )
+  const path = slice( arguments, 2 )
       , mutant = Mutant( subject )
 
   mutant.set( value, path )

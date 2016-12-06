@@ -1,13 +1,13 @@
 
-var assert = require('chai').assert
+const assert = require('chai').assert
 
 describe('path', () => {
-  var path = require('../src/path')
+  const path = require('../src/path')
 
   describe('resolve', () => {
-    var resolve = path.resolve
+    const resolve = path.resolve
 
-    var test = ( args, result, desc ) =>
+    const test = ( args, result, desc ) =>
       it(
         desc || ( JSON.stringify( args )+' => '+result ),
         () => assert.equal( resolve.apply( null, args ), result )
@@ -41,7 +41,7 @@ describe('path', () => {
   })
 
   describe('blank', () => {
-    var blank = path.blank
+    const blank = path.blank
 
     it('works with arguments', function () {
       function wrap() {
@@ -58,7 +58,7 @@ describe('path', () => {
   })
 
   describe('last', () => {
-    var last = path.last
+    const last = path.last
 
     it('works with arguments', function () {
       function wrap() {
@@ -73,7 +73,7 @@ describe('path', () => {
 
 
   describe('simple', () => {
-    var simple = path.simple
+    const simple = path.simple
 
     it('works with arguments', function () {
       function wrap() {
@@ -87,9 +87,9 @@ describe('path', () => {
   })
 
   describe('split', () => {
-    var split = path.split
+    const split = path.split
 
-    var test = ( args, result, desc ) =>
+    const test = ( args, result, desc ) =>
       it(
         desc || ( JSON.stringify( args )+' => '+JSON.stringify( result ) ),
         () => assert.deepEqual( split.apply( null, args ), result )
@@ -131,7 +131,7 @@ describe('path', () => {
   })
 
   describe('equal', () => {
-    var equal = path.equal
+    const equal = path.equal
     it('works', () => {
       assert.equal( equal('foo/', ['foo'] ), true )
       assert.equal( equal('foo/', [] ), false )

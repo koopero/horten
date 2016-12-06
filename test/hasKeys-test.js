@@ -1,8 +1,8 @@
-var test = require('./_test')
+const test = require('./_test')
     , assert = test.assert
 
 describe('hasKeys', function () {
-  var hasKeys = require('../src/hasKeys')
+  const hasKeys = require('../src/hasKeys')
   describe('no keys', function () {
     it('primitives', function () {
       assert.equal( hasKeys( 'string' ), false )

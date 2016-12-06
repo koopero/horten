@@ -28,7 +28,7 @@ const split = require('./path').split
 class Cursor extends EventEmitter {
   constructor ( config ) {
     super()
-    var self = this
+    const self = this
 
     this[ NS.held ] = {}
 
@@ -72,7 +72,7 @@ class Cursor extends EventEmitter {
     } )
 
     EVENT_NAMES.forEach( ( eventName ) => {
-      var listenerName = 'on' + eventName.slice( 0, 1 ).toUpperCase() + eventName.slice( 1 )
+      const listenerName = 'on' + eventName.slice( 0, 1 ).toUpperCase() + eventName.slice( 1 )
       if ( config[listenerName] )
         self.on( eventName, config[listenerName] )
     })
@@ -114,7 +114,7 @@ class Cursor extends EventEmitter {
     }
 
     if ( newMutant != mutant ) {
-      var wasListening = this.listening
+      const wasListening = this.listening
       this.listening = false
       this[ NS.mutant ] = newMutant
       this.listening = wasListening
@@ -173,7 +173,7 @@ class Cursor extends EventEmitter {
 
     // console.log('Cursor.set hold', value )
 
-    var oldValue = this[ NS.hold ]
+    const oldValue = this[ NS.hold ]
     this[ NS.hold ] = value
 
     if ( !value && oldValue ) {
@@ -201,7 +201,7 @@ class Cursor extends EventEmitter {
   }
 
   trigger( forceDelay ) {
-    var self = this
+    const self = this
         , delay = self[ NS.delayTime ]
         , time = now()
 
@@ -209,11 +209,11 @@ class Cursor extends EventEmitter {
       return false
 
     self[ NS.clearTimers ]()
-    var release = self.release.bind( self )
+    const release = self.release.bind( self )
 
     self[ NS.firstTrigger ] = self[ NS.firstTrigger ] || time
 
-    var triggerAge = time - self[ NS.firstTrigger ]
+    const triggerAge = time - self[ NS.firstTrigger ]
 
     if ( self.delayMax && self.delayMax < triggerAge ) {
       release()
@@ -227,7 +227,7 @@ class Cursor extends EventEmitter {
   }
 
   release() {
-    var self = this
+    const self = this
         , held = self[ NS.held ]
 
     if ( self[ NS.releasing ] )
@@ -267,7 +267,7 @@ class Cursor extends EventEmitter {
   //
   //
   patch( value ) {
-    var path = slice( arguments, 1 )
+    const path = slice( arguments, 1 )
         , mutant = this.mutant
 
     if ( this[ NS.echo ] )
@@ -277,7 +277,7 @@ class Cursor extends EventEmitter {
   }
 
   merge( value ) {
-    var path = slice( arguments, 1 )
+    const path = slice( arguments, 1 )
         , mutant = this.mutant
 
     if ( this[ NS.echo ] )
@@ -288,7 +288,7 @@ class Cursor extends EventEmitter {
 
 
   get( path ) {
-    var mutant = this.mutant
+    const mutant = this.mutant
     return mutant.get.apply( mutant, arguments )
   }
 

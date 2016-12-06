@@ -1,13 +1,13 @@
-var test = require('./_test')
+const test = require('./_test')
     , assert = test.assert
 
 describe('Echo', function () {
-  var Echo = require('../src/Echo')
+  const Echo = require('../src/Echo')
   it("doesn't smoke", function () {
-    var _module = require('../index')
+    const _module = require('../index')
     assert.isFunction( _module.Echo )
     assert.isFunction( Echo )
-    var echo = Echo()
+    const echo = Echo()
 
     assert.instanceOf( echo, Echo )
     assert.isFunction( echo.send )
@@ -15,20 +15,20 @@ describe('Echo', function () {
   })
 
   it('will work', function () {
-    var echo = Echo()
-    var data = { foo: 'bar' }
+    const echo = Echo()
+    const data = { foo: 'bar' }
     echo.send( data )
 
-    var result = echo.receive( data )
+    const result = echo.receive( data )
 
     assert.deepEqual( {}, result )
   })
 
   describe('receive', function () {
     it('will pass data unmolested', function () {
-      var echo = Echo()
-      var data = { foo: 'bar' }
-      var result = echo.receive( data )
+      const echo = Echo()
+      const data = { foo: 'bar' }
+      const result = echo.receive( data )
 
       assert.equal( result, data )
     })

@@ -1,20 +1,18 @@
-var test = require('./_test')
+const test = require('./_test')
     , assert = test.assert
     , assertPathEqual = test.assertPathEqual
 
 describe('Mutant::mutate', function() {
-  var Mutant = require('../src/Mutant')
+  const Mutant = require('../src/Mutant')
       , NS = require('../src/namespace')
       , mutate = NS.mutate
 
   describe('patch', function () {
     it("doesn't smoke", function () {
-      var mutant = Mutant()
+      const mutant = Mutant()
           , data = { foo: 'bar'}
 
-      var result = mutant[ mutate ]( data, [], { needDelta: true } )
-
-      console.log( 'result', result )
+      const result = mutant[ mutate ]( data, [], { needDelta: true } )
 
       assert( result )
       assert( result.delta )
