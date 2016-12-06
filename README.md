@@ -1,7 +1,9 @@
+This module has been a work in progress for years, but there's still no docs.
+Sorry about that.
+
 # Conventions
 
 **Horten** does things a little differently than comparable modules.
-
 
 ## Paths
 
