@@ -21,6 +21,14 @@ describe('unset', function () {
     assert.notEqual( result, data )
   })
 
+  it('will unset a path', function() {
+    const data = { foo: 'bar', bar: 'baz' }
+        , result = unset( data, 'foo' )
+
+    assert.deepEqual( result, { bar: 'baz' } )
+    assert.notEqual( result, data )
+  })
+
   it('will pass object unchanged when path does not exist', function () {
     const data = { foo: 'bar' }
         , result = unset( data, 'baz/' )

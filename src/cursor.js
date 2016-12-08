@@ -62,8 +62,8 @@ class Cursor extends EventEmitter {
             'root',
             'path',
             'mutant',
-            'listening',
-            'delayMax'
+            'delayMax',
+            'listening'
           ]
 
     keys.forEach( ( key ) => {
@@ -117,6 +117,8 @@ class Cursor extends EventEmitter {
       const wasListening = this.listening
       this.listening = false
       this[ NS.mutant ] = newMutant
+      if ( newMutant )
+        this[ NS.root ] = newMutant.root
       this.listening = wasListening
     }
 
@@ -230,8 +232,8 @@ class Cursor extends EventEmitter {
     const self = this
         , held = self[ NS.held ]
 
-    if ( self[ NS.releasing ] )
-      console.warn('Reentrant release.')
+    // if ( self[ NS.releasing ] )
+    //   console.warn('Reentrant release.')
 
     self[ NS.firstTrigger ] = 0
 
