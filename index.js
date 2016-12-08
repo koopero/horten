@@ -10,6 +10,7 @@ H.unset = require('./src/unset')
 H.Echo = require('./src/Echo')
 H.Mutant = require('./src/Mutant')
 H.Cursor = require('./src/Cursor')
+H.Tracer = require('./src/Tracer')
 H.root = require('./src/root')
 
 Object.freeze( H )
