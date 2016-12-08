@@ -6,6 +6,7 @@ const Cursor = require('./Cursor')
 class Tracer extends Cursor {
   constructor( opt ) {
     super( opt )
+    this.configure( { delay: 0 } )
     this.on('delta', this.onDelta.bind( this ) )
   }
 
