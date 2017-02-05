@@ -11,6 +11,7 @@ const Mutant = require('../src/Mutant')
 describe('Cursor', () => {
   const Cursor = require('../src/Cursor')
 
+
   describe('constructor', () => {
     it('will not smork', () => {
       const cursor = new Cursor()
@@ -28,6 +29,34 @@ describe('Cursor', () => {
       })
     })
 
+  })
+
+  describe('configure', () => {
+    describe('defaultValue', () => {
+      it('will do nothing', () => {
+        const root = new Mutant( { foo: 'bar' } )
+            , cursor = new Cursor( {
+              root,
+              path: 'foo',
+              defaultValue: 42
+            })
+
+        assert.equal( cursor.value, 'bar' )
+      })
+
+      it('will do something', () => {
+        const root = new Mutant()
+            , data = test.data()
+            , cursor = new Cursor( {
+              root: root,
+              path: 'foo',
+              defaultValue: data
+            })
+
+        assert.deepEqual( cursor.value, data )
+        assert.deepEqual( root.get(), { foo: data } )
+      })
+    })
   })
 
 
@@ -323,6 +352,20 @@ describe('Cursor', () => {
       cursor.release()
 
       assert.equal( calls, 1 )
+    })
+  })
+
+  describe('trigger', () => {
+    it('will work', () => {
+      const root = new Mutant()
+          , path = test.path()
+          , cursor = new Cursor( {
+            root,
+            path: path
+          })
+
+      cursor.trigger()
+      assert( cursor.value )
     })
   })
 

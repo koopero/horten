@@ -77,6 +77,13 @@ class Cursor extends EventEmitter {
         self.on( eventName, config[listenerName] )
     })
 
+    if ( 'value' in config )
+      self.value = config['value']
+    else if ( 'trigger' in config )
+      self.value = now()
+    else if ( 'defaultValue' in config && self.value === undefined )
+      self.value = config['defaultValue']
+
   }
 
   set listening ( value ) {
@@ -94,7 +101,7 @@ class Cursor extends EventEmitter {
 
     if ( mutant && !value && current ) {
       eachKey( self[ NS.listenerBound ], function ( listener, name ) {
-        mutant.removeEventListener( name, listener )
+        mutant.removeListener( name, listener )
       })
     }
 
@@ -181,7 +188,7 @@ class Cursor extends EventEmitter {
     if ( !value && oldValue ) {
       this[ NS.clearTimers ]()
     } else if ( oldValue && !value ) {
-      this.trigger()
+      this[ NS.doTimers ]()
     }
   }
 
@@ -202,31 +209,7 @@ class Cursor extends EventEmitter {
     return !!this[ NS.echo ]
   }
 
-  trigger( forceDelay ) {
-    const self = this
-        , delay = self[ NS.delayTime ]
-        , time = now()
 
-    if ( self[ NS.hold ] )
-      return false
-
-    self[ NS.clearTimers ]()
-    const release = self.release.bind( self )
-
-    self[ NS.firstTrigger ] = self[ NS.firstTrigger ] || time
-
-    const triggerAge = time - self[ NS.firstTrigger ]
-
-    if ( self.delayMax && self.delayMax < triggerAge ) {
-      release()
-    } else if ( delayIsTimeout( delay ) ) {
-      self[ NS.timeout ] = setTimeout( release, delay )
-    } else if ( delayIsImmediate( delay ) && forceDelay ) {
-      self[ NS.immediate ] = setImmediate( release )
-    } else {
-      release()
-    }
-  }
 
   release() {
     const self = this
@@ -310,7 +293,35 @@ class Cursor extends EventEmitter {
     this[ NS.listenerBound ]['delta']( this.value )
   }
 
+  trigger() {
+    this.value = now()
+  }
+}
 
+Cursor.prototype[ NS.doTimers ] = function ( forceDelay ) {
+  const self = this
+      , delay = self[ NS.delayTime ]
+      , time = now()
+
+  if ( self[ NS.hold ] )
+    return false
+
+  self[ NS.clearTimers ]()
+  const release = self.release.bind( self )
+
+  self[ NS.firstTrigger ] = self[ NS.firstTrigger ] || time
+
+  const triggerAge = time - self[ NS.firstTrigger ]
+
+  if ( self.delayMax && self.delayMax < triggerAge ) {
+    release()
+  } else if ( delayIsTimeout( delay ) ) {
+    self[ NS.timeout ] = setTimeout( release, delay )
+  } else if ( delayIsImmediate( delay ) && forceDelay ) {
+    self[ NS.immediate ] = setImmediate( release )
+  } else {
+    release()
+  }
 }
 
 Cursor.prototype[ NS.clearTimers ] = function() {
@@ -337,8 +348,10 @@ Cursor.prototype[ NS.listener ].delta = function ( delta ) {
   this[ NS.delta ].patch( delta )
   this[ NS.held ].change = true
   this[ NS.held ].value  = true
-  this.trigger()
+  this[ NS.doTimers ]()
 }
+
+
 
 module.exports = Cursor
 

@@ -20,6 +20,8 @@ describe('Mutant structure', function() {
 
       assertPathEqual( sub.path, path )
       assert.equal( sub.root, mutant )
+      assert.equal( sub.value, undefined )
+
     })
 
     it('walks to pre-set sub', function () {

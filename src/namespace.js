@@ -12,6 +12,7 @@ const keys = [
   'delayTime',
   'delta',
   'dirty',
+  'doTimers',
   'echo',
   'emit',
   'firstTrigger',

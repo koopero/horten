@@ -2,7 +2,9 @@ const H = exports
 
 H.NS = require('./src/namespace')
 H.path = require('./src/path')
-H.compose = require('./src/compose')
+H.util = {}
+H.util.compose = require('./src/compose')
+H.util.set = require('./src/set')
 H.pairs = require('./src/pairs')
 H.set = require('./src/set')
 H.wrap = require('./src/wrap')

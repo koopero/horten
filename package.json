@@ -1,6 +1,6 @@
 {
   "name": "horten",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "The ultimate global variable.",
   "main": "index.js",
   "directories": {
@@ -16,7 +16,7 @@
   },
   "browser": "index.js",
   "browserify": {
-    "transform": [["babelify", { "presets": ["es2015"] }]]
+    "transform": ["babelify"]
   },
   "author": "Samm Zuest Cooper <samm@sublight.ca>",
   "license": "MIT",
