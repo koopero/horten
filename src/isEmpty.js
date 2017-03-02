@@ -1,5 +1,6 @@
-'use strict'
-module.exports = function isEmpty( a ) {
+module.exports = isEmpty
+
+function isEmpty( a ) {
   if ( a === undefined || a === null )
     return true
 

@@ -5,6 +5,7 @@ const test = require('./_test')
     , assertPathEqual = test.assertPathEqual
 
 const Mutant = require('../src/Mutant')
+    , NS = require('../src/namespace')
     , eachKey = require('../src/eachKey')
     , wrap = require('../src/wrap')
 
@@ -150,13 +151,14 @@ describe('Cursor', () => {
     }, 50 )
   })
 
-  it('will accumulate deltas', ( cb ) => {
+  it('will accumulate deltas', ( done ) => {
     const root = new Mutant( { foo: 'bar' } )
         , cursor = new Cursor()
         , time = 30
 
     var calls = 0
 
+    console.log('*************')
 
     cursor.mutant = root
     cursor.listening = true
@@ -177,7 +179,7 @@ describe('Cursor', () => {
 
     cursor.on('delta', ( delta ) => {
       assert.deepEqual( delta, { baz: 42, bop: 123 } )
-      cb()
+      done()
     })
   })
 
@@ -225,6 +227,7 @@ describe('Cursor', () => {
     // cursor.echo = false
 
     cursor.on('delta', ( delta ) => {
+      console.log('BAD DELTA', delta, cursor[ NS.echo ] )
       assert.fail('It echoed')
     })
 

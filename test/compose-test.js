@@ -47,7 +47,7 @@ describe('compose', function () {
   it('merge multiple arguments', function () {
     const result = compose(
       { '/bar/baz': 4 },
-      null,
+      // null,
       { 'bar/foo/': 5 }
     )
     const expected = {

@@ -14,7 +14,7 @@ module.exports = function eachPath( subject, callback, initialPath ) {
       eachKey( subject, function ( value, key ) {
         walk( value, path.concat( key ) )
       } )
-    } else {
+    } else if ( 'undefined' != typeof subject ) {
       if ( callback )
         callback( subject, path )
 

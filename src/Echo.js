@@ -3,6 +3,8 @@
 module.exports = Echo
 
 const Mutant = require('./Mutant')
+    , hasKeys = require('./hasKeys')
+    , isEmpty = require('./isEmpty')
 
 function Echo() {
   const self = Object.create( Echo.prototype )
@@ -14,18 +16,19 @@ function Echo() {
   }
 
   self.receive = function ( data ) {
-    // console.trace('Echo.receive', data )
 
     data = new Mutant( data )
 
     echo.eachPath( function ( value, path ) {
       const echoValue = echo.get( path )
-
       if ( value == echoValue )
-        data.del( path )
+        data.unset( path )
 
-      echo.del( path )
+      echo.unset( path )
     })
+
+    echo.optimize()
+    data.optimize()
 
     const delta = data.get()
     return delta

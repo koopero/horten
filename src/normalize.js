@@ -22,7 +22,7 @@ module.exports = function normalize() {
     walk( arg )
   })
 
-  return mutant.result()
+  return mutant.get()
 
   function walk( value, path ) {
     if ( isArray( value ) ){

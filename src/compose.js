@@ -20,5 +20,5 @@ module.exports = function compose() {
       mutant.patch( arg )
   })
 
-  return mutant && mutant.result()
+  return mutant && mutant.get()
 }

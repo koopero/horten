@@ -32,14 +32,19 @@ const keys = [
   'onSubMutate',
   'parent',
   'path',
+  'patchingSub',
+  'rebuild',
   'releaseTime',
   'releasing',
   'root',
   'sender',
   'splitResult',
+  'stale',
   'subs',
   'timeout',
   'value',
+  'void',
+
 ]
 
 keys.forEach( ( key ) =>

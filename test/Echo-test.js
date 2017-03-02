@@ -21,7 +21,7 @@ describe('Echo', function () {
 
     const result = echo.receive( data )
 
-    assert.deepEqual( {}, result )
+    assert.deepEqual( result, undefined )
   })
 
   describe('receive', function () {
@@ -33,4 +33,38 @@ describe('Echo', function () {
       assert.equal( result, data )
     })
   })
+
+  describe('more real world', () => {
+    it('will do some real shit', () => {
+      const echo = new Echo()
+
+      echo.send( {
+        foo: {
+          bar: 'baz'
+        }
+      })
+
+      let result = echo.receive( {
+        foo: {
+          bar: 'baz',
+          bop: 'fuzz'
+        },
+        baz: 'fux'
+      })
+
+      assert.deepEqual( result, { foo: { bop: 'fuzz' }, baz: 'fux' } )
+
+      result = echo.receive( {
+        foo: {
+          bar: 'baz',
+          bop: 'fuzz'
+        },
+        baz: 'fux'
+      })
+
+      assert.deepEqual( result, { foo: { bar: 'baz', bop: 'fuzz' }, baz: 'fux' } )
+
+    })
+  })
+
 })

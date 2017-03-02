@@ -9,7 +9,7 @@ function unset( data ) {
   const path = slice( arguments, 1 )
       , mutant = Mutant( data )
 
-  mutant.del( path )
+  mutant.unset( path )
 
   return mutant.get()
 }

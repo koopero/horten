@@ -242,7 +242,7 @@ class Cursor extends EventEmitter {
       delta = self[ NS.echo ].receive( delta )
     }
 
-    if ( delta !== undefined && !( hasKeys( delta ) && isEmpty( delta ) ) )
+    if ( !isEmpty(delta) )
       this.emit( 'delta', delta )
 
     self[ NS.releasing ] = false

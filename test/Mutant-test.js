@@ -23,17 +23,17 @@ describe('Mutant', function() {
   })
 
   describe('initialize', function () {
-    it('new', function () {
+    it('new', () => {
       const foo = new Mutant()
-      foo.result()
+      foo.get()
     })
 
-    it('function', function () {
+    it('function', () => {
       const foo = Mutant()
-      foo.result()
+      foo.get()
     })
 
-    it('from Mutant', function () {
+    it('from Mutant', () => {
       const ref = { foo: 'bar' }
           , a = Mutant( ref )
           , b = Mutant( a )
@@ -43,21 +43,28 @@ describe('Mutant', function() {
     })
   })
 
+  describe('public properties', () => {
+    it('path', () => {
+      const root = new Mutant()
+      assert.deepEqual( root.path, [] )
+      assert( root.hasOwnProperty('path') )
+    })
+
+    it('value', () => {
+      const data = test.data()
+          , root = new Mutant( data )
+
+      assert( root.hasOwnProperty('value') )
+      assert.equal( root.value, data )
+    })
+  })
+
   it('pass a reference', function () {
     const ref = {}
         , mutant = new Mutant( ref )
-        , result = mutant.result()
+        , result = mutant.get()
 
     assert.equal( result, ref )
-  })
-
-
-  describe('.isDirty', function() {
-    it('will not smoke', function () {
-      const mutant = new Mutant()
-      assert.isFunction( mutant.isDirty )
-      assert.isBoolean( mutant.isDirty() )
-    })
   })
 
   describe('.get', function () {
@@ -102,17 +109,17 @@ describe('Mutant', function() {
     })
   })
 
-  describe('.del', function () {
+  describe('.unset', function () {
     it('will delete root', function () {
       const mutant = new Mutant( { foo: 'bar' } )
-      mutant.del()
+      mutant.unset()
       assert.equal( mutant.get(), undefined )
     })
 
     it('will delete key', function () {
       const init = { foo: 'bar', bar: 'baz' }
           , mutant = new Mutant( init )
-      mutant.del('foo')
+      mutant.unset('foo')
       const result = mutant.get()
       assert.deepEqual( result, { bar: 'baz' } )
       assert.notEqual( result, init )
@@ -122,7 +129,7 @@ describe('Mutant', function() {
       const init = { foo: 'bar', bar: 'baz' }
           , mutant = new Mutant( init )
 
-      mutant.del()
+      mutant.unset()
       const result = mutant.get()
       assert.equal( result, undefined )
     })
@@ -135,7 +142,7 @@ describe('Mutant', function() {
       mutant.walk('foo').patch( 3 )
       mutant.walk('bar')
 
-      mutant.del()
+      mutant.unset()
       assert.equal( mutant.get(), undefined )
       mutant.walk('foo').patch( 2 )
       assert.deepEqual( mutant.get(), { foo: 2 } )
@@ -148,8 +155,7 @@ describe('Mutant', function() {
           , mutant = new Mutant( ref )
 
       mutant.patch()
-      assert.equal( mutant.isDirty(), false )
-      assert.equal( mutant.result(),  ref )
+      assert.equal( mutant.get(), ref )
     })
 
 
@@ -157,7 +163,7 @@ describe('Mutant', function() {
       const mutant = new Mutant()
       mutant.patch( { foo: 123 } )
       mutant.patch( { bar: 456 } )
-      assert.deepEqual( mutant.result(), { foo: 123, bar: 456 } )
+      assert.deepEqual( mutant.get(), { foo: 123, bar: 456 } )
     })
 
     describe( 'will return delta', function () {
@@ -213,14 +219,14 @@ describe('Mutant', function() {
     it('will merge initial with object', function () {
       const mutant = new Mutant( { foo: 123 } )
       mutant.patch( { bar: 456 } )
-      assert.deepEqual( mutant.result(), { foo: 123, bar: 456 } )
+      assert.deepEqual( mutant.get(), { foo: 123, bar: 456 } )
     })
 
     it('path', function () {
       const mutant = new Mutant()
 
       mutant.patch( 42, 'foo/bar' )
-      const result = mutant.result()
+      const result = mutant.get()
       assert.deepEqual( result, { foo: { bar: 42 } } )
     })
 
@@ -238,7 +244,7 @@ describe('Mutant', function() {
 
       mutant.patch( value, 'foo/bar' )
 
-      const result = mutant.result()
+      const result = mutant.get()
       assert.deepEqual( result, expect )
     })
   })
@@ -255,8 +261,7 @@ describe('Mutant', function() {
       const value = 'foo'
       const result = mutant.set( value )
       // assert.equal( result, true )
-      assert.equal( mutant.result(), value )
-      assert( mutant.isDirty() )
+      assert.equal( mutant.get(), value )
     })
 
     it('will set a key', function () {
@@ -268,9 +273,7 @@ describe('Mutant', function() {
       expect[ key ] = value
 
       const result = mutant.set( value, key )
-      // assert.equal( result, true )
-      // assert.equal( mutant.isDirty(), true )
-      assert.deepEqual( mutant.result(), expect )
+      assert.deepEqual( mutant.get(), expect )
 
     })
 
@@ -282,8 +285,7 @@ describe('Mutant', function() {
 
       const result = mutant.set( value, key )
       assert.equal( result, false )
-      assert.equal( mutant.isDirty(), false )
-      assert.equal( mutant.result(), object )
+      assert.equal( mutant.get(), object )
     })
 
     it('will set a path', function () {
@@ -291,10 +293,7 @@ describe('Mutant', function() {
           , mutant = new Mutant( object )
 
       const setResult = mutant.set( 42, 'foo', 'bar' )
-      // assert.equal( setResult, true )
-      // assert.equal( mutant.isDirty(), true )
-
-      const result = mutant.result()
+      const result = mutant.get()
 
       assert.deepEqual( result, { foo: { bar: 42 } } )
       assert.notStrictEqual( result, object )
@@ -306,8 +305,6 @@ describe('Mutant', function() {
           , mutant = new Mutant( object )
 
       const result = mutant.set( value, 'foo', 'bar' )
-      // assert.equal( result, false )
-      // assert.equal( mutant.isDirty(), false )
       assert.equal( mutant.get(), object )
     })
 
@@ -318,11 +315,9 @@ describe('Mutant', function() {
           , mutant = new Mutant( object )
 
       const setResult = mutant.set( Math.random(), 'foo', 'bar' )
-      // assert.equal( setResult, true )
-      // assert.equal( mutant.isDirty(), true )
 
-      const result = mutant.result()
-      assert.equal( mutant.result().baz, ref )
+      const result = mutant.get()
+      assert.equal( mutant.get().baz, ref )
     })
   })
 
