@@ -1,3 +1,6 @@
+`use strict`
+require('babel-polyfill')
+
 const H = exports
 
 H.NS = require('./src/namespace')
@@ -18,4 +21,7 @@ H.root = require('./src/root')
 
 Object.freeze( H )
 
+//
+// Add global.
+//
 global.H = H

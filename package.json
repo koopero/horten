@@ -2,7 +2,10 @@
   "name": "horten",
   "version": "0.8.0",
   "description": "The ultimate global variable.",
-  "main": "index.js",
+  "main": "./index.js",
+  "browser": {
+    "./index.js": "./browser.js"
+  },
   "directories": {
     "test": "test"
   },
@@ -14,7 +17,6 @@
       "es2015"
     ]
   },
-  "browser": "index.js",
   "browserify": {
     "transform": [
       "babelify"
