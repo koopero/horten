@@ -1,6 +1,6 @@
 {
   "name": "horten",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "The ultimate global variable.",
   "main": "./index.js",
   "browser": {
@@ -25,6 +25,7 @@
   "author": "Samm Zuest Cooper <samm@sublight.ca>",
   "license": "MIT",
   "dependencies": {
+    "babel-polyfill": "^6.23.0",
     "listenercount": "^1.0.1",
     "lodash.map": "^4.6.0",
     "setimmediate": "^1.0.5"
