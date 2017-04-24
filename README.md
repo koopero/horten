@@ -1,4 +1,4 @@
-If you'd prefer to dive right in to creating interactive applications with `Horten`, see the [horten-server](https://github.com/koopoer/horten-server) module. It provides pretty, easy, realtime controls, persistence,
+If you'd prefer to dive right in to creating interactive applications with `Horten`, see the [horten-server](https://github.com/koopoer/horten-server) module. It provides pretty, easy, realtime controls and persistence.
 
 # Traits
 
@@ -88,7 +88,7 @@ assert.equal( sub.get(), 'qux' )
 
 ## Cursors
 
-**Cursors** are.
+**Cursors** are awesome, but I haven't written the docs yet. Sorry.
 
 
 ## Events

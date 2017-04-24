@@ -1,6 +1,6 @@
 {
   "name": "horten",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "The ultimate global variable.",
   "main": "./index.js",
   "browser": {
@@ -12,11 +12,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "babel": {
-    "presets": [
-      "es2015"
-    ]
-  },
   "browserify": {
     "transform": [
       "babelify"
@@ -25,13 +20,12 @@
   "author": "Samm Zuest Cooper <samm@sublight.ca>",
   "license": "MIT",
   "dependencies": {
-    "babel-polyfill": "^6.23.0",
     "listenercount": "^1.0.1",
     "lodash.map": "^4.6.0",
     "setimmediate": "^1.0.5"
   },
   "devDependencies": {
-    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-es2015": "^6.24.1",
     "babelify": "^7.3.0",
     "chai": "^3.5.0",
     "mocha": "^3.1.0",
