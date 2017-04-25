@@ -6,12 +6,7 @@ const now = function () { return new Date().getTime() }
 
 const setImmediate = require('setimmediate')
 
-const _listenNames = ['delta']
-    , _listenKeys = {}
-
 const EVENT_NAMES = ['delta','change','value']
-
-_listenNames.forEach( function ( name ) { _listenKeys[name] = Symbol( name ) } )
 
 const EventEmitter = require('events')
     , assert = require('assert')

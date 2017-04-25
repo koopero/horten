@@ -255,7 +255,8 @@ Mutant.prototype[ NS.emit ] = function ( result, path ) {
   }
 
   if ( !isEmpty( result.delta ) ) {
-    Object.freeze( result.delta )
+    if ( hasKeys( result.delta ) )
+      Object.freeze( result.delta )
     this.emit('delta', wrap( result.delta, path ) )
   }
 }

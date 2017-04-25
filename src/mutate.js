@@ -16,7 +16,7 @@ const NS = require('./namespace')
     , isEmpty = require('./isEmpty')
     , listenerCount = require('listenercount')
     , Mutant = require('./Mutant')
-
+    , assign = Object.assign || require('object-assign')
 
 function mutate( value, path, options ) {
   const self = this
@@ -41,8 +41,6 @@ function mutate( value, path, options ) {
   //
   if ( Mutant.isMutant( value ) )
     value = value.get()
-  else
-    Object.freeze( value )
 
   const currentValue = self[ NS.value ]
 
@@ -150,7 +148,7 @@ function mutate( value, path, options ) {
       var valToSub = value[key]
 
       self[ NS.patchingSub ] = sub
-      var subResult = sub[ NS.mutate ]( valToSub, [], Object.assign( {}, options, { hard: true } ) )
+      var subResult = sub[ NS.mutate ]( valToSub, [], assign( {}, options, { hard: true } ) )
       self[ NS.patchingSub ] = null
 
       if ( !isEmpty( subResult.delta ) || options['allDelta'] ) {
