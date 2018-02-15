@@ -29,7 +29,7 @@ function mutate( value, path, options ) {
   options.hard = !!options.hard
   options.needDelta = true
   options.needKeys = options.needKeys || !!listenerCount( self, 'keys' )
-
+  options.needKeys = true
   //
   // Set state
   //
@@ -43,6 +43,8 @@ function mutate( value, path, options ) {
     value = value.get()
 
   const currentValue = self[ NS.value ]
+
+  result.wasDefined = self.isDefined()
 
   if ( !blank( path ) ) {
     goDeeper()
@@ -58,10 +60,17 @@ function mutate( value, path, options ) {
     setPrimitive()
   }
 
-  if ( !isEmpty( result.delta ) )
-    result['changed']= true
-  else
+  if ( isEmpty( result.delta ) ) {
     delete result.delta
+  } else {
+    result['changed'] = true
+  }
+
+
+  if ( options['needKeys'] ) {
+    result['keys'] = self.keys() || 0
+    result['keysChanged'] = !compareKeys( result['keysBefore'], result['keys'] )
+  }
 
   result['changed'] = !!result['changed']
 
@@ -83,6 +92,9 @@ function mutate( value, path, options ) {
 
 
   function goDeeper() {
+    if ( options.needKeys )
+      result.keysBefore = self.keys()
+
     const key = path[0]
         , sub = self.subMutant( key )
 
@@ -93,7 +105,7 @@ function mutate( value, path, options ) {
     if ( !isEmpty( subResult.delta ) )
       result.delta = wrap( subResult.delta, key )
 
-    // console.log('deeper', subResult)
+    // console.log('deeper', key, subResult)
 
 
     if ( subResult.changed ) {
@@ -119,6 +131,7 @@ function mutate( value, path, options ) {
     if ( !self[ NS.void ] ) {
       self[ NS.void ] = true
       result.changed = true
+      result.unset = true
     }
     self[ NS.value ] = undefined
     self[ NS.stale ] = false
@@ -137,12 +150,12 @@ function mutate( value, path, options ) {
   }
 
   function setHard() {
-    // console.log('setHard', value )
+    if ( options.needKeys )
+      result.keysBefore = self.keys()
 
-    if ( hasKeys( value ) )
-      eachKey( value, function ( subVal, key ) {
-        var sub = self.subMutant( key, subVal )
-      } )
+    eachKey( value, function ( subVal, key ) {
+      var sub = self.subMutant( key, subVal )
+    } )
 
     eachKey( self[ NS.subs ], function ( sub, key ) {
       var valToSub = value[key]
@@ -166,6 +179,9 @@ function mutate( value, path, options ) {
   }
 
   function setSoft() {
+    if ( options.needKeys )
+      result.keysBefore = self.keys()
+
     eachKey( value, function ( subVal, key ) {
       var sub = self.subMutant( key, subVal )
       self[ NS.patchingSub ] = sub
@@ -185,4 +201,24 @@ function mutate( value, path, options ) {
     if ( self[ NS.stale ] )
       self[ NS.void ] = false
   }
+}
+
+// true if same
+function compareKeys( a, b ) {
+  if ( !a && !b ) return true
+
+  a = a || []
+  if ( a.length != b.length ) return false
+
+  let spacer = '|'
+  return a.join( spacer ) == b.join( spacer )
+}
+
+function getKeys( value ) {
+  if ( hasKeys( value ) ) {
+    let result = eachKey( this[ NS.subs ], ( sub, key ) => sub.isDefined() && key )
+    result = result.filter( v => v != false )
+    result.sort()
+    return result
+  } 
 }

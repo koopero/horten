@@ -22,6 +22,7 @@ const keys = [
   'initial',
   'isMutant',
   'key',
+  'keys',  
   'listener',
   'listening',
   'listenerBound',

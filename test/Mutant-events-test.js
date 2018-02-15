@@ -60,5 +60,69 @@ describe('Mutant events', function() {
     })
   })
 
+  describe('keys', () => {
+    it('is called on initialize', ( done ) => {
+      const mutant = Mutant()
+          , data = { foo: 'bar' }
+
+      var calls = 0
+
+      mutant.on('keys', function () {
+        done()
+      })
+
+      mutant.set( data )
+    })
+
+    it('is called from sub set', done => {
+      const mutant = Mutant()
+      const sub = mutant.walk('foo')
+
+      mutant.on('keys', ( keys ) => {
+        assert.deepEqual( keys, ['foo'] )
+        done()
+      } )
+
+      sub.set('bar')
+    } )
+
+    it('is called from unset', done => {
+      const mutant = Mutant( { foo: 'bar'} )
+
+      // console.log('-------------')
+      assert.deepEqual( mutant.keys(), ['foo'] )
+
+      mutant.on('keys', ( keys ) => {
+        assert.deepEqual( keys, [] )
+        done()
+      } )
+
+      mutant.unset('foo')
+    } )
+
+    it('is called from set', done => {
+      const mutant = Mutant( { foo: 'bar' } )
+
+      // assert.deepEqual( mutant.keys(), ['foo'] )
+
+      mutant.on('keys', ( keys ) => {
+        assert.deepEqual( keys, ['bar'] )
+        done()
+      } )
+
+      mutant.set({bar:'foo'})
+    } )
+
+    it('is called from patch', done => {
+      const mutant = Mutant( { foo: 'bar' } )
+
+      mutant.on('keys', ( keys ) => {
+        assert.deepEqual( keys, ['bar','foo'] )
+        done()
+      } )
+
+      mutant.patch({bar:'foo'})
+    } )
+  })
 
 })

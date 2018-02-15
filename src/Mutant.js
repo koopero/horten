@@ -244,14 +244,30 @@ Mutant.prototype.optimize = function () {
   return empty
 }
 
+Mutant.prototype.keys = function () {
+  return getKeys( this.get() )
+}
+
 
 Mutant.prototype[ NS.mutate ] = require('./mutate')
 
 Mutant.prototype[ NS.emit ] = function ( result, path ) {
-  // console.log('emit', this.path, path, result.delta)
+  // console.log('emit', path, result )
   if ( 'changed' in result ) {
     this.emit('change')
     this.emit('value', this.get() )
+  }
+
+
+  if ( result.keysChanged && path.length == 0 ) {
+    // console.log('keys 1', this.path, path, result )
+    this.emit('keys', result.keys )
+  }
+
+  if ( path.length == 1 && ( !result.wasDefined || result.unset ) ) {
+    // console.log('keys 2', this.path, path, result )
+    
+    this.emit('keys', this.keys() )
   }
 
   if ( !isEmpty( result.delta ) ) {
@@ -264,7 +280,7 @@ Mutant.prototype[ NS.emit ] = function ( result, path ) {
 
 Mutant.prototype[ NS.onSubMutate ] = function ( result, path ) {
 
-  // console.log('onSubMutate', this.path, path, result )
+  // console.log('onSubMutate', path )
 
   if ( result['changed'] || result['unset'] )
     this[ NS.stale ] = true
@@ -272,6 +288,17 @@ Mutant.prototype[ NS.onSubMutate ] = function ( result, path ) {
   this[ NS.emit ]( result, path )
 
   if ( this.parent ) {
-    this.parent[ NS.onSubMutate ]( result, split( this.key, path ) )
+    this.parent[ NS.onSubMutate ]( result, split( this[ NS.key ], path ) )
   }
+}
+
+
+function getKeys( value ) {
+  if ( hasKeys( value ) ) {
+    let result = Object.keys( value )
+    result.sort()
+    return result
+  } 
+
+  return []
 }

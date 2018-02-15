@@ -398,4 +398,13 @@ describe('Mutant', function() {
       assert.equal( calls, 1 )
     })
   })
+
+  describe('.keys()', () => {
+    it('works for objects', () => {
+      const data = { foo: { bar: 42 } }
+      const mutant = new Mutant( data )
+
+      assert.deepEqual( mutant.keys(), ['foo'] )
+    })
+  } )
 })
