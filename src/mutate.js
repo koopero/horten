@@ -22,6 +22,7 @@ function mutate( value, path, options ) {
   const self = this
   var result = {}
 
+  result.path = self.path || 'FUUUUUU'
   //
   // Process options
   //

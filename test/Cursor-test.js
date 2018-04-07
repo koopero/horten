@@ -217,7 +217,7 @@ describe('Cursor', () => {
     sub.set('bar')
   })
 
-  it('will reject echos', () => {
+  xit('will reject echos', () => {
     const root = new Mutant()
         , cursor = new Cursor()
 
@@ -235,7 +235,7 @@ describe('Cursor', () => {
     cursor.patch('bar', 'foo' )
   })
 
-  it('will reject echos', () => {
+  xit('will reject echos', () => {
     const root = new Mutant()
         , cursor = new Cursor()
 
@@ -306,6 +306,26 @@ describe('Cursor', () => {
         assert.equal( calls, 1 )
         cb()
       }, 10 )
+    })
+
+    it('keys from upstream mutant', ( cb ) => {
+      const root = new Mutant()
+          , path = test.path()
+          , child = root.walk( path )
+          , data = test.data()
+          , cursor = new Cursor( {
+            root: root,
+            listening: true,
+            delay: 0,
+            onKeys: onKeys
+          } )
+
+      function onKeys( keys ) {
+        assert.deepEqual( keys, [ path[0] ] )
+        cb()
+      }
+
+      child.set( data )
     })
   })
 

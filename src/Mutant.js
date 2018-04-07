@@ -26,10 +26,6 @@ class Mutant extends EventEmitter {
     this[ NS.path ] = []
     this[ NS.void ] = true
 
-    if ( arguments.length ) {
-      this.set( initial )
-    }
-
     Object.defineProperty( this, 'path', {
       enumerable: true,
       get: () => this[ NS.path ]
@@ -45,6 +41,10 @@ class Mutant extends EventEmitter {
       get: () => this.get(),
       set: ( v ) => this.set( v )
     } )
+
+    if ( isDefined( initial ) ) {
+      this.set( initial )
+    }
 
   }
 
@@ -122,6 +122,7 @@ Mutant.prototype.subMutant = function ( key ) {
   if ( !( key in this[ NS.subs ] ) ) {
     sub = new Mutant()
     sub[ NS.key ] = key
+    console.log('+ SUB', key )
     sub[ NS.path ] = split( this[ NS.path ], key )
     sub['_path'] = split( this[ NS.path ], key )
     sub[ NS.root ] = this.root
@@ -252,7 +253,8 @@ Mutant.prototype.keys = function () {
 Mutant.prototype[ NS.mutate ] = require('./mutate')
 
 Mutant.prototype[ NS.emit ] = function ( result, path ) {
-  // console.log('emit', path, result )
+  path = path || []
+  console.log('emit', resolve( this.path ), path, result )
   if ( 'changed' in result ) {
     this.emit('change')
     this.emit('value', this.get() )
@@ -288,7 +290,7 @@ Mutant.prototype[ NS.onSubMutate ] = function ( result, path ) {
   this[ NS.emit ]( result, path )
 
   if ( this.parent ) {
-    this.parent[ NS.onSubMutate ]( result, split( this[ NS.key ], path ) )
+    this.parent[ NS.onSubMutate ]( result, split( this.key, path ) )
   }
 }
 
