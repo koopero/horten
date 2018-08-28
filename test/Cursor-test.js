@@ -82,7 +82,7 @@ describe('Cursor', () => {
 
 
   it('will get the value at a path', () => {
-    const root = new Mutant( { foo: { bar: 'baz'}})
+    const root = new Mutant( { foo: { bar: 'baz'} } )
         , cursor = new Cursor()
 
     cursor.root = root
@@ -158,8 +158,6 @@ describe('Cursor', () => {
 
     var calls = 0
 
-    console.log('*************')
-
     cursor.mutant = root
     cursor.listening = true
     cursor.delay = time
@@ -181,6 +179,8 @@ describe('Cursor', () => {
       assert.deepEqual( delta, { baz: 42, bop: 123 } )
       done()
     })
+
+
   })
 
   it('will receive delta from subMutant', ( cb ) => {
@@ -313,6 +313,9 @@ describe('Cursor', () => {
           , path = test.path()
           , child = root.walk( path )
           , data = test.data()
+          // , data = { 
+          //   foo: 'bar'
+          // }
           , cursor = new Cursor( {
             root: root,
             listening: true,

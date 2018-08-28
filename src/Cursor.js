@@ -224,8 +224,6 @@ class Cursor extends EventEmitter {
     self[ NS.releaseTime ] = now()
     self[ NS.releasing ] = true
 
-    console.log('Cursor.release', held )
-
     if ( held.keys )
       this.emit( 'keys', held.keys )
 
@@ -350,7 +348,7 @@ Cursor.prototype[ NS.listener ].delta = function ( delta ) {
 }
 
 Cursor.prototype[ NS.listener ].keys = function ( keys ) {
-  console.log('Cursor keys listener', keys )
+  // console.log('Cursor keys listener', keys )
   this[ NS.held ].keys      = keys
   this[ NS.doTimers ]()
 }

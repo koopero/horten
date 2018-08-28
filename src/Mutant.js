@@ -74,17 +74,22 @@ Mutant.prototype[ NS.rebuild ] = function () {
   const self = this
 
   var value = {}
+  var keys  = []
 
   eachKey( self[ NS.subs ], function ( sub, key ) {
     if ( sub[ NS.void ] )
       return
 
     value[ key ] = sub.get()
+    keys.push( key )
   } )
 
+  keys.sort()
+  
   self[ NS.value ] = value
   self[ NS.stale ] = false
   self[ NS.void ] = false
+  self[ NS.keys ] = keys
 }
 
 
@@ -122,7 +127,6 @@ Mutant.prototype.subMutant = function ( key ) {
   if ( !( key in this[ NS.subs ] ) ) {
     sub = new Mutant()
     sub[ NS.key ] = key
-    console.log('+ SUB', key )
     sub[ NS.path ] = split( this[ NS.path ], key )
     sub['_path'] = split( this[ NS.path ], key )
     sub[ NS.root ] = this.root
@@ -246,7 +250,13 @@ Mutant.prototype.optimize = function () {
 }
 
 Mutant.prototype.keys = function () {
-  return getKeys( this.get() )
+  let keys = []
+  eachKey( this[ NS.subs ], function ( sub, key ) {
+    if ( !sub[ NS.void ] )
+      keys.push( key )
+  } )
+  keys.sort()
+  return keys
 }
 
 
@@ -254,23 +264,16 @@ Mutant.prototype[ NS.mutate ] = require('./mutate')
 
 Mutant.prototype[ NS.emit ] = function ( result, path ) {
   path = path || []
-  console.log('emit', resolve( this.path ), path, result )
+  // console.log('emit', resolve( this.path ), path, result )
   if ( 'changed' in result ) {
     this.emit('change')
     this.emit('value', this.get() )
   }
 
-
   if ( result.keysChanged && path.length == 0 ) {
-    // console.log('keys 1', this.path, path, result )
     this.emit('keys', result.keys )
   }
 
-  if ( path.length == 1 && ( !result.wasDefined || result.unset ) ) {
-    // console.log('keys 2', this.path, path, result )
-    
-    this.emit('keys', this.keys() )
-  }
 
   if ( !isEmpty( result.delta ) ) {
     if ( hasKeys( result.delta ) )
@@ -281,14 +284,26 @@ Mutant.prototype[ NS.emit ] = function ( result, path ) {
 
 
 Mutant.prototype[ NS.onSubMutate ] = function ( result, path ) {
-
-  // console.log('onSubMutate', path )
+  let isStructural = !result.wasDefined || result.unset
 
   if ( result['changed'] || result['unset'] )
     this[ NS.stale ] = true
 
+  var oldKeys 
+  if ( isStructural && path.length > 0 ) {
+    oldKeys = this[ NS.keys ] || []
+    
+  }
+
+
   this[ NS.emit ]( result, path )
 
+  if ( isStructural && path.length > 0 ) {
+    let newKeys = this.keys()
+    if ( oldKeys = oldKeys.join(',') != newKeys.join(',') )
+      this.emit('keys', newKeys )
+  }
+ 
   if ( this.parent ) {
     this.parent[ NS.onSubMutate ]( result, split( this.key, path ) )
   }

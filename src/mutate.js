@@ -140,14 +140,16 @@ function mutate( value, path, options ) {
 
   function setPrimitive() {
     // console.log('setPrimitive', value )
-    if ( value !== self[ NS.value ] ) {
+    if ( 'undefined' == typeof value ) {
+      self[ NS.void ] = true
+      result.unset = true
+    } else if ( value !== self[ NS.value ] ) {
       self[ NS.value ] = value
       result.delta = value
+      self[ NS.void ] = false
     }
 
-    self[ NS.void ] = false
     self[ NS.stale ] = false
-
   }
 
   function setHard() {
