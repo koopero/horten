@@ -24,7 +24,6 @@
     "listenercount": "^1.0.1",
     "lodash.map": "^4.6.0",
     "object-assign": "^4.1.1",
-    "object.assign": "^4.0.4",
     "setimmediate": "^1.0.5"
   },
   "devDependencies": {

@@ -89,7 +89,6 @@ describe('Mutant events', function() {
     it('is called from unset', done => {
       const mutant = Mutant( { foo: 'bar'} )
 
-      // console.log('-------------')
       assert.deepEqual( mutant.keys(), ['foo'] )
 
       mutant.on('keys', ( keys ) => {
