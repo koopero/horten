@@ -6,7 +6,7 @@ const now = function () { return new Date().getTime() }
 
 const setImmediate = require('setimmediate')
 
-const EVENT_NAMES = ['delta','change','value']
+const EVENT_NAMES = ['delta','change','value','keys']
 
 const EventEmitter = require('events')
     , assert = require('assert')
@@ -224,8 +224,8 @@ class Cursor extends EventEmitter {
     self[ NS.releaseTime ] = now()
     self[ NS.releasing ] = true
 
-    // console.log('Cursor.release', held, delta )
-
+    if ( held.keys )
+      this.emit( 'keys', held.keys )
 
     if ( held.change )
       this.emit( 'change' )
@@ -233,12 +233,13 @@ class Cursor extends EventEmitter {
     if ( held.value )
       this.emit( 'value', this.value )
 
-    if ( self[ NS.echo ] ) {
+    if ( hasKeys( delta ) && self[ NS.echo ] ) {
       delta = self[ NS.echo ].receive( delta )
     }
 
-    if ( !isEmpty(delta) )
+    if ( !isEmpty(delta) ) {
       this.emit( 'delta', delta )
+    }
 
     self[ NS.releasing ] = false
   }
@@ -346,6 +347,11 @@ Cursor.prototype[ NS.listener ].delta = function ( delta ) {
   this[ NS.doTimers ]()
 }
 
+Cursor.prototype[ NS.listener ].keys = function ( keys ) {
+  // console.log('Cursor keys listener', keys )
+  this[ NS.held ].keys      = keys
+  this[ NS.doTimers ]()
+}
 
 
 module.exports = Cursor

@@ -26,10 +26,6 @@ class Mutant extends EventEmitter {
     this[ NS.path ] = []
     this[ NS.void ] = true
 
-    if ( arguments.length ) {
-      this.set( initial )
-    }
-
     Object.defineProperty( this, 'path', {
       enumerable: true,
       get: () => this[ NS.path ]
@@ -45,6 +41,10 @@ class Mutant extends EventEmitter {
       get: () => this.get(),
       set: ( v ) => this.set( v )
     } )
+
+    if ( isDefined( initial ) ) {
+      this.set( initial )
+    }
 
   }
 
@@ -74,17 +74,22 @@ Mutant.prototype[ NS.rebuild ] = function () {
   const self = this
 
   var value = {}
+  var keys  = []
 
   eachKey( self[ NS.subs ], function ( sub, key ) {
     if ( sub[ NS.void ] )
       return
 
     value[ key ] = sub.get()
+    keys.push( key )
   } )
 
+  keys.sort()
+  
   self[ NS.value ] = value
   self[ NS.stale ] = false
   self[ NS.void ] = false
+  self[ NS.keys ] = keys
 }
 
 
@@ -244,15 +249,31 @@ Mutant.prototype.optimize = function () {
   return empty
 }
 
+Mutant.prototype.keys = function () {
+  let keys = []
+  eachKey( this[ NS.subs ], function ( sub, key ) {
+    if ( !sub[ NS.void ] )
+      keys.push( key )
+  } )
+  keys.sort()
+  return keys
+}
+
 
 Mutant.prototype[ NS.mutate ] = require('./mutate')
 
 Mutant.prototype[ NS.emit ] = function ( result, path ) {
-  // console.log('emit', this.path, path, result.delta)
+  path = path || []
+  // console.log('emit', resolve( this.path ), path, result )
   if ( 'changed' in result ) {
     this.emit('change')
     this.emit('value', this.get() )
   }
+
+  if ( result.keysChanged && path.length == 0 ) {
+    this.emit('keys', result.keys )
+  }
+
 
   if ( !isEmpty( result.delta ) ) {
     if ( hasKeys( result.delta ) )
@@ -263,15 +284,38 @@ Mutant.prototype[ NS.emit ] = function ( result, path ) {
 
 
 Mutant.prototype[ NS.onSubMutate ] = function ( result, path ) {
-
-  // console.log('onSubMutate', this.path, path, result )
+  let isStructural = !result.wasDefined || result.unset
 
   if ( result['changed'] || result['unset'] )
     this[ NS.stale ] = true
 
+  var oldKeys 
+  if ( isStructural && path.length > 0 ) {
+    oldKeys = this[ NS.keys ] || []
+    
+  }
+
+
   this[ NS.emit ]( result, path )
 
+  if ( isStructural && path.length > 0 ) {
+    let newKeys = this.keys()
+    if ( oldKeys = oldKeys.join(',') != newKeys.join(',') )
+      this.emit('keys', newKeys )
+  }
+ 
   if ( this.parent ) {
     this.parent[ NS.onSubMutate ]( result, split( this.key, path ) )
   }
+}
+
+
+function getKeys( value ) {
+  if ( hasKeys( value ) ) {
+    let result = Object.keys( value )
+    result.sort()
+    return result
+  } 
+
+  return []
 }

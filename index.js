@@ -7,6 +7,8 @@ H.util.compose = require('./src/compose')
 H.util.set = require('./src/set')
 H.wrap = H.util.wrap = require('./src/wrap')
 
+H.flatten = require('./src/flatten')
+
 H.pairs = require('./src/pairs')
 H.set = require('./src/set')
 H.unset = require('./src/unset')

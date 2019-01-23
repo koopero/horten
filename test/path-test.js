@@ -135,7 +135,22 @@ describe('path', () => {
     it('works', () => {
       assert.equal( equal('foo/', ['foo'] ), true )
       assert.equal( equal('foo/', [] ), false )
+    })
+  })
 
+  describe('startsWith', () => {
+    const startsWith = path.startsWith
+
+    it('true on exact match', () => {
+      assert.equal( startsWith( ['foo/'], 'foo' ), true )
+    })
+
+    it('false on no match', () => {
+      assert.equal( startsWith( ['foo/'], 'bar' ), false )
+    })
+
+    it('array on partial', () => {
+      assert.deepEqual( startsWith( 'foo/', 'foo/bar' ), ['bar'] )
     })
   })
 

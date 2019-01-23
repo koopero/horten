@@ -151,6 +151,28 @@ path.resolve = function () {
   }
 }
 
+path.startsWith = function( a ) {
+  a = path.split( a )
+  let b = path.slice( arguments, 1 )
+  let i = 0
+  do {
+    if ( i >= a.length && i >= b.length )
+      return true
+
+    if ( i >= b.length )
+      return false
+
+    if ( i >= a.length )
+      return path.slice( b, a.length )
+
+    if ( a[i] != b[i] )
+      return false
+
+    i ++
+  } while ( true )
+}
+
+
 path.string = path.resolve
 
 path.equal = function ( a, b ) {
