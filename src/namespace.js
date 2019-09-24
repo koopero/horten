@@ -48,8 +48,6 @@ const keys = [
 
 ]
 
-const _Symbol = require('es6-symbol')
-
 keys.forEach( ( key ) =>
-  NS[key] = NS[key] || _Symbol( key )
+  NS[key] = NS[key] || Symbol( key )
 )
