@@ -1,6 +1,4 @@
-'use strict'
-
-const path = exports
+const path = module.exports
 
 const isString = ( val ) => 'string' == typeof val
     , isArrayLike = ( val ) => ( 'object' == typeof val ) && ( 'number' == typeof val.length )

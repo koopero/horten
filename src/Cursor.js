@@ -1,11 +1,7 @@
 'use strict'
 
 const NS = require('./namespace')
-
 const now = function () { return new Date().getTime() }
-
-const setImmediate = require('setimmediate')
-
 const EVENT_NAMES = ['delta','change','value','keys']
 
 const EventEmitter = require('events')

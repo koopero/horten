@@ -16,7 +16,7 @@ const NS = require('./namespace')
     , isEmpty = require('./isEmpty')
     , listenerCount = require('listenercount')
     , Mutant = require('./Mutant')
-    , assign = Object.assign || require('object-assign')
+    , assign = Object.assign
 
 function mutate( value, path, options ) {
   const self = this

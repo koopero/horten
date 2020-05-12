@@ -1,11 +1,16 @@
 'use strict'
 
-const map = require('lodash.map')
-    , hasKeys = require('./hasKeys')
+const hasKeys = require('./hasKeys')
 
 module.exports = function ( subject, callback ) {
 
-  if ( hasKeys( subject ) )
-    // This is still cheating. Write it for real.
-    return map( subject, callback )
+  if ( hasKeys( subject ) ) {
+    let keys = Object.keys( subject )
+    let result = []
+    for ( let key of keys ) {
+      result.push( callback( subject[key], key ) )
+    }
+    return result
+  }
+
 }
